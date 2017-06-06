@@ -1,0 +1,195 @@
+.webforms-fields-comment {
+    float: left;
+    margin-top: 4px;
+    line-height: 1.3em;
+    color: #666;
+    font-size: .9em;
+    width: 100%;
+}
+
+.webforms-fields-hint {
+    font-style: italic;
+    color: grey;
+}
+
+.group-select li textarea {
+    height: 10em;
+}
+
+.highlight .webforms-calendar input, .webforms-calendar input {
+    background-image: url(calendar.gif) !important;
+    background-position: 99% 2px !important;
+    background-repeat: no-repeat !important;
+}
+
+.calendar {
+    z-index: 1000;
+}
+
+ul.webforms-errors-list {
+    margin: 5px;
+    padding: 5px;
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+ul.webforms-errors-list li {
+    margin-bottom: 5px;
+}
+
+p.webforms-error-message {
+    margin: 10px;
+    text-align: center;
+}
+
+.webforms-uploaded-file {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    float: left;
+}
+
+.webforms-uploaded-file-delete {
+    margin: 3px 0 0 0;
+    clear: both;
+}
+
+.webforms-uploaded-file-delete-label {
+    margin-left: 5px;
+    float: none !important;
+}
+
+.list-select {
+    padding: 10px !important;
+}
+
+.form-list li, li.control {
+    list-style: none;
+    position: relative;
+}
+
+.checkbox {
+    float: left;
+}
+
+figcaption {
+    padding: 5px 20px;
+    margin: 5px;
+}
+
+/* Tooltip */
+
+.ot-content {
+    text-align: left;
+}
+
+.tooltip-icon {
+    position: absolute;
+    top: 0;
+    left: -20px;
+    background-image: url('tooltip.png');
+    background-size: 15px 15px;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+/* Sidebar template */
+
+.block-form, .block-form .input-box label {
+    font-size: 11px !important;
+}
+
+.block-form .input-text, .block-form textarea, .block-form .form-list .input-box, .block-form .field {
+    width: 100%;
+}
+
+.block-form .input-text {
+    padding: 1px 0;
+}
+
+.block-form textarea {
+    height: 70px;
+}
+
+.block-form .block-content {
+    padding: 5px 9px;
+}
+
+.block-form label {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.block-form .input-box label {
+    font-weight: normal !important;
+}
+
+.block-form .input-box {
+    margin-bottom: 10px;
+}
+
+.block-form .required em {
+    color: red;
+}
+
+.block-form .list-select {
+    padding-bottom: 0px !important;
+}
+
+.block-form p.required {
+    float: left;
+}
+
+/* Customer account */
+#webforms-customer-account-form {
+    padding-top: 15px;
+}
+
+/* Success text */
+.webforms-success-text {
+    border: 1px solid #ccc;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 212, 96, 0.26);
+    border-radius: 5px;
+}
+
+/* File preview */
+
+.file-preview {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.file-preview h3 {
+    font-size: 12px;
+}
+
+.file-preview li {
+    margin: 0;
+    padding: 10px 0;
+    margin: 0;
+    overflow: auto;
+    position: relative;
+}
+
+.file-preview li img {
+    border: solid 1px #999;
+    border-radius: 3px;
+    padding: 3px;
+    margin: 0 10px 0 0;
+    display: block;
+    float: left;
+}
+
+.file-cancel {
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.file-progress {
+    font-size: 90%;
+    color: #777;
+}

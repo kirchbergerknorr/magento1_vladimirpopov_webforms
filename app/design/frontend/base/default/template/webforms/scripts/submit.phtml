@@ -1,0 +1,93 @@
+<?php if(!$this->getUid()) $this->setUid($this->getWebform()->getId())?>
+
+<script>
+	var webform_<?php echo $this->getUid()?> = new VarienForm('webform_<?php echo $this->getUid()?>', <?php echo (int)$this->getData('focus')?>);
+	$('webform_<?php echo $this->getUid()?>_submit_button').observe('click', function () {
+		var form = webform_<?php echo $this->getUid()?>;
+		if(form.validator && form.validator.validate()){
+			form.submit();
+			<?php if($this->getAjax()) { ?>
+			// hide form buttons
+			$$('#webform_<?php echo $this->getUid()?>_form .buttons-set .button').each(function(button){button.hide()});
+			// show progress text
+			$('webform_<?php echo $this->getUid()?>_sending_data').show();
+			<?php } ?>
+		}
+	});
+
+	<?php if($this->getAjax()) { ?>
+	var iframe = $('webform_<?php echo $this->getUid()?>_iframe');
+	iframe.observe('load',function(){
+		var doc = this.contentDocument ? this.contentDocument: this.contentWindow.document;
+		var json = {success:false};
+		if(doc.body.innerHTML.unfilterJSON())
+			json = doc.body.innerHTML.evalJSON();
+		else return;
+		if(json.success > 0){
+			if(json.script){
+				eval(json.script);
+				return;
+			}
+			if(json.redirect_url){
+				$('webform_<?php echo $this->getUid()?>_progress_text').update('<?php echo $this->__('Redirecting')?>');
+				window.location = json.redirect_url;
+				return;
+			}
+			$('webform_<?php echo $this->getUid()?>_progress_text').update('<?php echo $this->__('Complete')?>');
+            var successText = json.success_text.unescapeHTML();
+
+            <?php if(!$this->getData('after_submission_form')){ ?>
+			Effect.Fade('webform_<?php echo $this->getUid()?>_form',{
+				duration: 0.5, from:1, to:0,
+				afterFinish: function(){
+					$('webform_<?php echo $this->getUid()?>_success_text').update(successText).show();
+					Effect.Fade('webform_<?php echo $this->getUid()?>_success_text',{
+						duration:0.5, from:0, to:1
+					});
+					if(<?php echo (int)$this->getData('scroll_to')?>) $('webform_<?php echo $this->getUid()?>_success_text').scrollTo();
+                }
+
+			});
+            <?php } else { ?>
+            Dialog.alert(successText,{
+                title: "<?php echo $this->__('Success!')?>",
+                className: "alphacube",
+                width:300,
+                buttonClass: "button",
+                okLabel: "<?php echo $this->__('Close')?>",
+                destroyOnClose: true,
+                recenterAuto:true
+            })
+            $('webform_<?php echo $this->getUid()?>_progress_text').hide();
+            $('webform_<?php echo $this->getUid()?>_sending_data').hide();
+            $$('#webform_<?php echo $this->getUid()?>_form .buttons-set .button').each(function(button){button.show()});
+            $('webform_<?php echo $this->getUid()?>').reset();
+            <?php } ?>
+			<?php echo $this->getData('after_submission_script')?>
+		} else {
+			// hide progress text
+			if($('webform_<?php echo $this->getUid()?>_sending_data'))
+				$('webform_<?php echo $this->getUid()?>_sending_data').hide();
+			// show all form buttons
+			if($$('#webform_<?php echo $this->getUid()?>_form .buttons-set .button'))
+				$$('#webform_<?php echo $this->getUid()?>_form .buttons-set .button').each(function(button){button.show()});
+			if(json.errors && typeof(json.errors) == "string"){
+				Dialog.alert(json.errors.unescapeHTML(),{
+					title: "<?php echo $this->__('Error(s) occured')?>",
+					className: "alphacube",
+					width:300,
+					buttonClass: "button",
+					okLabel: "<?php echo $this->__('Close')?>",
+					destroyOnClose: true,
+					recenterAuto:true
+				})
+			} else {
+				alert('<?php echo $this->__('Error(s) occured')?>');
+			}
+			if(json.script){
+				eval(json.script);
+			}
+		}
+	});
+	<?php } ?>
+</script>

@@ -1,0 +1,26 @@
+<?php if ($this->getMessages()){?>
+<ul class="note-list">
+<?php foreach ($this->getMessages() as $message): ?>
+	<li id="history-message-<?php echo $message->getId()?>">
+		<strong><?php echo $message->getAuthor()?><span class="separator">|</span><?php echo $this->helper('core')->formatDate($message->getCreatedTime(), 'medium') ?></strong>
+		<?php echo Mage::helper('core')->formatTime($message->getCreatedTime(), 'medium') ?><span class="separator">|</span><small><?php echo $this->helper('sales')->__('Customer') ?>
+		<strong class="subdue" id="subdue-<?php echo $message->getId()?>">
+		<?php if ($message->getIsCustomerEmailed()): ?>
+		<?php echo $this->helper('webforms')->__('E-mailed') ?>
+		<img src="<?php echo $this->getSkinUrl('images/ico_success.gif') ?>" width="16" height="16" alt="" />
+		<?php else: ?>
+		<?php echo $this->helper('webforms')->__('Not E-mailed') ?>
+		<?php endif; ?>
+		</strong></small>
+		<?php if($this->getResult()->getCustomerEmail()){ ?>
+		<span class="separator">|</span>
+		<a href="javascript:emailMessage(<?php echo $message->getId()?>)"><?php echo Mage::helper('webforms')->__('Send E-mail')?></a>
+		<?php } ?>
+		<span class="separator">|</span>
+		<a href="javascript:deleteMessage(<?php echo $message->getId()?>)"><?php echo Mage::helper('webforms')->__('Delete')?></a>
+		<br>
+		<?php echo $message->getMessage() ?>
+	</li>
+<?php endforeach; ?>
+</ul>
+<?php }

@@ -1,0 +1,61 @@
+<?php /** @var VladimirPopov_WebForms_Block_Customer_Account_Results $this */ ?>
+
+<?php if ($this->getCollection()->getSize()): ?>
+<?php echo $this->getChildHtml('toolbar') ?>
+<table class="data-table box-table" id="webform-customer-account-results" cellspacing="0">
+    <col width="65"/>
+    <col width="220"/>
+    <col width="170"/>
+    <col width="40"/>
+    <col width="60"/>
+    <thead>
+    <tr>
+        <th><?php echo $this->__('ID') ?></th>
+        <th><?php echo $this->__('Subject') ?></th>
+        <th><?php echo $this->__('Date') ?></th>
+        <?php /* <th><?php echo $this->__('Replied') ?></th> */?>
+        <?php if(Mage::registry('webform')->getApprove()):?>
+        <th><?php echo $this->__('Status') ?></th>
+        <?php endif;?>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($this->getCollection() as $result): ?>
+        <?php /** @var VladimirPopov_WebForms_Model_Results $result */ ?>
+        <tr>
+            <td style="white-space:nowrap;"><?php echo $result->getId() ?></td>
+            <td title="<?php echo $this->escapeHtml($result->getEmailSubject());?>"><a href="<?php echo $this->getUrlResultView($result)?>"><?php echo $result->getEmailSubject()?></a></td>
+            <td><?php echo Mage::helper('core')->formatDate($result->getCreatedTime(),'medium',true);?></td>
+            <?php /* <td><?php echo $this->getRepliedStatus($result) ?></td> */?>
+            <?php if(Mage::registry('webform')->getApprove()):?>
+            <td><?php echo $this->getApproveStatus($result) ?></td>
+            <?php endif;?>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+<script type="text/javascript">decorateTable('webform-customer-account-results')</script>
+<?php echo $this->getChildHtml('toolbar') ?>
+<div class="buttons-set">
+    <p class="back-link"><a href="javascript:window.history.back()"><small>&laquo; </small><?php echo $this->__('Back') ?></a></p>
+
+    <button type="button" class="button"
+            id="webforms-show-form"
+            onclick="this.hide();$('webforms-hide-form').show();Effect.SlideDown('webforms-customer-account-form');"
+            title="<?php echo $this->__('Show Form') ?>">
+			<span>
+				<span><?php echo $this->__('Show Form') ?></span>
+			</span>
+    </button>
+
+    <button type="button" class="button"
+            id="webforms-hide-form"
+            style="display: none"
+            onclick="this.hide();$('webforms-show-form').show();Effect.SlideUp('webforms-customer-account-form',{duration:0.1});"
+            title="<?php echo $this->__('Hide Form') ?>">
+			<span>
+				<span><?php echo $this->__('Hide Form') ?></span>
+			</span>
+    </button>
+</div>
+<?php endif;?>

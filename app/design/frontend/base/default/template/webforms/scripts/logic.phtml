@@ -1,0 +1,50 @@
+<?php
+    $elementId = $this->getUid();
+    if(!$elementId) $elementId = $this->getWebform()->getId();
+?>
+<?php
+$fields_to_fieldsets = $this->getWebform()->getFieldsToFieldsets();
+// create field map
+$field_map = array();
+foreach ($fields_to_fieldsets as $fieldset_id => $fieldset) {
+    foreach ($fieldset["fields"] as $field) {
+        $field_map['fieldset_' . $fieldset_id][] = $field->getId();
+    }
+}
+?>
+
+<script type="text/javascript">
+    var logicRules_<?php echo $elementId?> = [];
+    var targets_<?php echo $elementId?> = <?php echo json_encode($this->getWebform()->_getLogicTarget($this->getUid()))?>;
+    var fieldMap_<?php echo $elementId?> = <?php echo json_encode($field_map)?>;
+    <?php
+    $logic_rules = $this->getWebform()->getLogic();
+    foreach ($logic_rules as $logic) {
+        if ($logic->getIsActive()) {
+            $targets = $logic->getTarget();
+            if($this->getUid()){
+                for($i=0;$i<count($targets);$i++){
+                    if(strstr($targets[$i],'field_')){
+                        $targets[$i] = str_replace('field_','field_'.$this->getUid(),$targets[$i]);
+                    }
+                    if(strstr($targets[$i],'fieldset_')){
+                        $targets[$i] = str_replace('fieldset_','fieldset_'.$this->getUid(),$targets[$i]);
+                    }
+                }
+            }
+    ?>
+    logicRules_<?php echo $elementId?>.push({
+        'field_id': '<?php echo $logic->getFieldId()?>',
+        'action': '<?php echo $logic->getAction()?>',
+        'logic_condition': '<?php echo $logic->getLogicCondition()?>',
+        'aggregation': '<?php echo $logic->getAggregation()?>',
+        'value':<?php echo json_encode($logic->getFrontendValue())?>,
+        'target':<?php echo json_encode($targets)?>
+    });
+    <?php
+        }
+    }
+    ?>
+    // execute form logic
+    JSWebFormsLogic(targets_<?php echo $elementId?>, logicRules_<?php echo $elementId?>, fieldMap_<?php echo $elementId?>, '<?php echo $this->getUid()?>');
+</script>

@@ -1,0 +1,28 @@
+<?php $_countries = Mage::getResourceModel('directory/country_collection')->loadByStore(Mage::app()->getStore())->toOptionArray(false) ?>
+<?php 
+// set default country if found
+$customer = Mage::helper('customer')->getCustomer();
+if($customer){
+	$address = $customer->getDefaultBillingAddress();
+	if($address){
+		$country = $address->getCountry();
+		if(!$this->getFieldValue()) $this->setFieldValue($country);
+	}
+} 
+?>
+<?php if (count($_countries) > 0): ?>
+    <select name="<?php echo $this->getFieldName()?>"
+            id='<?php echo $this->getFieldId()?>'
+            class='<?php echo $this->getFieldClass()?>'
+            style='<?php echo $this->getFieldStyle()?>' <?php if($this->getField()->getDisabled()){?> disabled <?php } ?>>
+            aria-labelledby="label_<?php echo $this->getFieldId() ?>"
+            <?php if($this->getField()->getRequired()) {?>required<?php }?>>
+        <option value=""><?php echo Mage::helper('webforms')->__('-- Please Select --');?></option>
+        <?php foreach($_countries as $_country): ?>
+            <?php $selected = ($this->getFieldValue() == $_country['value']) ? 'selected="selected"' : ''; ?>
+            <option value="<?php echo $_country['value'] ?>" <?php echo $selected ?>>
+                <?php echo $_country['label'] ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+<?php endif; ?>

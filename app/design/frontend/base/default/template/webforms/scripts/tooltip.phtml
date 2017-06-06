@@ -1,0 +1,6 @@
+<?php $tooltip_content =  str_replace("'","\'",trim(preg_replace('/\s+/', ' ', $this->getTooltip())));?>
+<?php $randomId = 'tooltip'.Mage::helper('webforms')->randomAlphaNum();?>
+<div id="<?php echo $randomId?>" class="tooltip-icon"></div>
+<script>
+    new Opentip("#<?php echo $randomId?>", "<?php echo $tooltip_content?>", {delay:0});
+</script>

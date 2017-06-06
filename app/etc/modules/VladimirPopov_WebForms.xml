@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<VladimirPopov_WebForms>
+			<active>true</active>
+			<codePool>community</codePool>
+			<depends>
+				<Mage_Customer/>
+			</depends>
+		</VladimirPopov_WebForms>
+	</modules>
+</config>

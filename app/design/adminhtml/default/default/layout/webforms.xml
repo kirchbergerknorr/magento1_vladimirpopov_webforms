@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <adminhtml_webforms_webforms_index>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>webforms/style.css</stylesheet>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="webforms/adminhtml_webforms" name="webforms"/>
+        </reference>
+    </adminhtml_webforms_webforms_index>
+    <adminhtml_webforms_response_edit>
+        <update handle="editor"/>
+    </adminhtml_webforms_response_edit>
+    <adminhtml_webforms_webforms_edit>
+        <update handle="editor"/>
+    </adminhtml_webforms_webforms_edit>
+    <adminhtml_webforms_quickresponse_edit>
+        <update handle="editor"/>
+    </adminhtml_webforms_quickresponse_edit>
+    <adminhtml_webforms_results_edit>
+        <update handle="editor"/>
+        <reference name="head">
+            <action method="addCss">
+                <file>webforms/style.css</file>
+            </action>
+            <action method="addJs">
+                <file>webforms/adminhtml/logic.js</file>
+            </action>
+            <action method="addJs">
+                <file>webforms/adminhtml/validation.js</file>
+            </action>
+        </reference>
+    </adminhtml_webforms_results_edit>
+    <adminhtml_customer_edit>
+        <update handle="editor"/>
+        <reference name="head">
+            <action method="addJs">
+                <file>webforms/adminhtml/logic.js</file>
+            </action>
+            <action method="addJs">
+                <file>webforms/adminhtml/result.js</file>
+            </action>
+            <action method="addCss">
+                <stylesheet>webforms/style.css</stylesheet>
+            </action>
+        </reference>
+    </adminhtml_customer_edit>
+    <adminhtml_webforms_results_reply>
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>webforms/style.css</stylesheet>
+            </action>
+        </reference>
+        <update handle="editor"/>
+    </adminhtml_webforms_results_reply>
+    <adminhtml_webforms_fields_edit>
+        <update handle="editor"/>
+    </adminhtml_webforms_fields_edit>
+    <adminhtml_webforms_results_index>
+        <reference name="head">
+            <action method="addJs">
+                <file>webforms/adminhtml/result.js</file>
+            </action>
+            <action method="addCss">
+                <stylesheet>webforms/style.css</stylesheet>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="webforms/adminhtml_results" name="results"/>
+        </reference>
+    </adminhtml_webforms_results_index>
+    <adminhtml_webforms_results_popup>
+        <update handle="popup"/>
+        <remove name="footer"/>
+        <reference name="content">
+            <block name="result_popup" type="webforms/adminhtml_results_popup" template="webforms/result/popup.phtml"/>
+        </reference>
+    </adminhtml_webforms_results_popup>
+</layout>

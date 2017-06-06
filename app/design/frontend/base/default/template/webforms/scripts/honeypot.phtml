@@ -1,0 +1,4 @@
+<?php $honeypot = 'field_' . Mage::helper('webforms')->randomAlphaNum(); ?>
+<textarea id="<?php echo $honeypot; ?>" type="text"
+          name="message">Please enable JavaScript.</textarea>
+<script>if($('<?php echo $honeypot?>')) $('<?php echo $honeypot?>').remove();</script>

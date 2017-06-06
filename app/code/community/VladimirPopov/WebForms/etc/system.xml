@@ -1,0 +1,440 @@
+<?xml version="1.0"?>
+<config>
+	<tabs>
+		<webforms_tab translate="label" module="webforms">
+			<label>Web-forms</label>
+			<sort_order>99999</sort_order>
+		</webforms_tab>
+	</tabs> 
+	<sections>
+		<webforms translate="label">
+			<label>Web-forms Settings</label>
+			<tab>webforms_tab</tab>
+			<frontend_type>text</frontend_type>
+			<sort_order>100</sort_order>
+			<show_in_default>1</show_in_default>
+			<show_in_website>1</show_in_website>
+			<show_in_store>1</show_in_store>
+			<groups>
+				<license translate="label comment">
+					<comment></comment>
+					<label>License</label>
+					<frontend_type>text</frontend_type>
+					<frontend_model>webforms/adminhtml_license</frontend_model>
+					<sort_order>0</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+                        <version translate="label comment">
+                            <comment><![CDATA[]]></comment>
+                            <label>WebForms Pro</label>
+                            <frontend_type>text</frontend_type>
+                            <frontend_model>VladimirPopov_WebForms_Block_Adminhtml_Version</frontend_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </version>
+                        <serial translate="label comment">
+							<comment><![CDATA[Enter your license serial number here]]></comment>
+							<label>Serial #</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</serial>
+					</fields>				
+				</license>
+				<general translate="label comment">
+					<comment></comment>
+					<label>General</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>1</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<ajax translate="label comment">
+							<comment><![CDATA[Forms will be submitted without page reloading]]></comment>
+							<label>Ajax submission</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</ajax>
+                        <store_temp_submission_data>
+                            <comment><![CDATA[Store temporary customer submission data when the form submission fails. Please disable this option if you have cache related issues with the form]]></comment>
+                            <label>Store temporary submission data</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <ajax>0</ajax>
+                            </depends>
+                        </store_temp_submission_data>
+						<formkey translate="label comment">
+							<comment><![CDATA[Enable form key check for improved customer session validation. Please disable if you have <b>Invalid form key</b> error on submission]]></comment>
+							<label>Enable form key check</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>4</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</formkey>
+						<use_translation translate="label comment">
+							<comment><![CDATA[Use Magento translations to automatically translate forms in frontend]]></comment>
+							<label>Use Magento translations</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>5</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</use_translation>
+						<login_redirect translate="label comment">
+							<comment><![CDATA[Custom login redirect URL(Key) if user is not authorized]]></comment>
+							<label>Login redirect URL</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</login_redirect>
+                        <preview_enabled>
+                            <comment><![CDATA[Enable preview of web-forms in frontend]]></comment>
+                            <label>Enable preview of web-forms</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </preview_enabled>
+                        <preview_template>
+                            <comment><![CDATA[Select default template for the form preview]]></comment>
+                            <label>Preview template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>webforms/webforms_template</source_model>
+                            <sort_order>55</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <preview_enabled>1</preview_enabled>
+                            </depends>
+                        </preview_template>
+                        <preview_store>
+                            <comment><![CDATA[Select default Store View for the form preview]]></comment>
+                            <label>Preview Store View</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_store</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <preview_enabled>1</preview_enabled>
+                            </depends>
+                        </preview_store>
+						<customer_navigation_block_title>
+							<comment><![CDATA[Set Web-forms block title in customer account area]]></comment>
+							<label>Customer area Web-forms block title</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>12</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</customer_navigation_block_title>
+					</fields>
+				</general>
+				<email translate="label comment">
+					<comment></comment>
+					<label>E-mail</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>2</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<email translate="label comment">
+							<comment><![CDATA[This address will be used by default to send you new results notifications. You can set multiple addresses comma-separated]]></comment>
+							<label>Default e-mail address for notifications</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</email>
+						<email_reply_to translate="label comment">
+							<comment><![CDATA[This address will be used in reply-to field in customer notification]]></comment>
+							<label>Reply-to e-mail address for customer</label>
+							<frontend_type>text</frontend_type>
+							<validate>validate-email</validate>
+							<sort_order>15</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</email_reply_to>
+						<email_from translate="label comment">
+							<comment><![CDATA[In case you have problems receiving notifications this e-mail address should be set to your mailbox used for sending out system e-mails. It doesn't affect reply-to values(except Gmail web-interface which has issues with it).]]></comment>
+							<label>Send all e-mails from this address</label>
+							<frontend_type>text</frontend_type>
+							<validate>validate-email</validate>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</email_from>
+                        <stoplist>
+                            <comment><![CDATA[Block specified e-mail addresses from submission]]></comment>
+                            <label>Block e-mail addresses</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </stoplist>
+					</fields>
+				</email>
+				<message translate="label comment">
+					<label>Messages</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>12</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<nl2br translate="label comment">
+							<comment><![CDATA[Convert newline characters to &lt;br&gt; html tags when saving message]]></comment>
+							<label>Convert newlines to html tags</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</nl2br>
+					</fields>
+				</message>
+				<captcha translate="label comment">
+					<comment><![CDATA[In order for reCaptcha to work please enter valid site and secret keys. You can get those by visiting <a href='http://www.google.com/recaptcha' target='_blank'>this page</a>]]></comment>
+					<label>Google reCAPTCHA v2</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>14</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<mode translate="label">
+							<label>Mode</label>
+							<frontend_type>select</frontend_type>
+							<source_model>webforms/captcha_mode</source_model>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</mode>
+						<theme translate="label">
+							<label>Theme</label>
+							<frontend_type>select</frontend_type>
+							<source_model>webforms/captcha_theme</source_model>
+							<sort_order>5</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</theme>
+						<public_key translate="label">
+							<label>Site key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</public_key>
+						<private_key translate="label">
+							<label>Secret key</label>
+							<frontend_type>text</frontend_type>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</private_key>
+					</fields>
+				</captcha>
+                <honeypot>
+                    <comment><![CDATA[Honeypot captcha uses special hidden field to trick spam bots. This feature can dramatically decrease spam submissions at no cost to customer comfort]]></comment>
+                    <label>Honeypot CAPTCHA</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>15</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enable>
+                            <label>Enable</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable>
+                    </fields>
+                </honeypot>
+				<results translate="label comment">
+					<comment></comment>
+					<label>Results</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>20</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<fieldname_display_limit translate="label comment">
+							<label>Field name display length</label>
+							<comment><![CDATA[This will limit long field names in results table. It doesn't affect export]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</fieldname_display_limit>
+					</fields>
+				</results>
+				<files translate="label comment">
+					<comment></comment>
+					<label>Files</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>22</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<validate_filename>
+							<label>Validate file names</label>
+							<comment><![CDATA[Allow only latin characters in file names]]></comment>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</validate_filename>
+						<upload_limit translate="label comment">
+							<label>Upload limit</label>
+							<comment><![CDATA[Maximum upload file size in kB]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>15</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</upload_limit>
+					</fields>
+				</files>
+				<images translate="label comment">
+					<comment></comment>
+					<label>Images</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>25</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<cache translate="label comment">
+							<label>Enable cache</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</cache>
+						<upload_limit translate="label comment">
+							<label>Upload limit</label>
+							<comment><![CDATA[Maximum upload file size in kB]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>2</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</upload_limit>
+						<grid_thumbnail_width translate="label comment">
+							<label>Grid thumbnail width</label>
+							<comment><![CDATA[Thumbnail width in results grid]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</grid_thumbnail_width>
+						<grid_thumbnail_height translate="label comment">
+							<label>Grid thumbnail height</label>
+							<comment><![CDATA[Thumbnail height in results grid]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</grid_thumbnail_height>
+						<email_thumbnail_width translate="label comment">
+							<label>E-mail thumbnail width</label>
+							<comment><![CDATA[Thumbnail width in e-mail notifications]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>30</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</email_thumbnail_width>
+						<email_thumbnail_height translate="label comment">
+							<label>E-mail thumbnail height</label>
+							<comment><![CDATA[Thumbnail height in e-mail notifications]]></comment>
+							<frontend_type>text</frontend_type>
+							<sort_order>40</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</email_thumbnail_height>
+					</fields>
+				</images>
+				<contacts translate="label comment">
+					<comment><![CDATA[Replace default Magento contacts page (yourdomain.com/contacts) with the preferred web-form]]></comment>
+					<label>Contacts</label>
+					<frontend_type>text</frontend_type>
+					<sort_order>110</sort_order>
+					<show_in_default>1</show_in_default>
+					<show_in_website>1</show_in_website>
+					<show_in_store>1</show_in_store>
+					<fields>
+						<enable translate="label comment">
+							<label>Enable</label>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>1</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</enable>
+						<webform translate="label comment">
+							<comment><![CDATA[Select web-form to replace default contacts page]]></comment>
+							<label>Contacts web-form</label>
+							<frontend_type>select</frontend_type>
+							<source_model>webforms/contacts</source_model>
+							<sort_order>10</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</webform>
+					</fields>
+				</contacts>
+			</groups>
+		</webforms>
+	</sections>
+</config>

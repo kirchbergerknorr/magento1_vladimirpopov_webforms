@@ -1,0 +1,13 @@
+<?php $hint = str_replace('"', '\"' , htmlspecialchars(trim($this->getField()->getHint()))); ?>
+<input id='<?php echo $this->getFieldId() ?>'
+       type='text'
+       name='<?php echo $this->getFieldName() ?>'
+       class='<?php echo $this->getFieldClass() ?>'
+       style='<?php echo $this->getFieldStyle() ?>'
+       placeholder="<?php echo $hint?>"
+       value='<?php echo htmlspecialchars($this->getFieldValue()); ?>'
+       aria-labelledby="label_<?php echo $this->getFieldId() ?>"
+       <?php if($this->getField()->getRequired()) {?>required<?php }?>
+       <?php if ($this->getField()->getType() == 'email'){ ?>onkeyup="if(this.value.search(' ')>=0){this.value = this.value.replace(' ','');}"<?php } ?>
+       <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>
+/>

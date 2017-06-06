@@ -1,0 +1,35 @@
+<div class='webforms-calendar'>
+    <input id='<?php echo $this->getFieldId() ?>'
+           type='text'
+           name='<?php echo $this->getFieldName() ?>'
+           class='<?php echo $this->getFieldClass() ?>'
+           style='<?php echo $this->getFieldStyle() ?>'
+           value='<?php echo $this->getCustomerValue() ?>'
+           aria-labelledby="label_<?php echo $this->getFieldId() ?>"
+           <?php if ($this->getField()->getRequired()) { ?>required<?php } ?>
+           <?php if ($this->getField()->getRequired()){ ?>readonly='readonly'<?php } ?>
+    />
+</div>
+
+
+<script type='text/javascript'>
+
+    /* example of how to disable certain dates */
+
+    var disableFunc<?php echo $this->getFieldId()?> = function (date) {
+//        var minDate = new Date();
+//        minDate.setMonth(minDate.getMonth() - 3);
+//        return date < minDate;
+    };
+
+    Calendar.setup({
+        inputField: '<?php echo $this->getFieldId()?>',
+        ifFormat: '<?php echo str_replace('\'', '\\\'', $this->getField()->getDateStrFormat())?>',
+        showsTime: <?php echo $this->getShowTime()?>,
+        button: '<?php echo $this->getFieldId()?>',
+        disableFunc: disableFunc<?php echo $this->getFieldId()?>,
+        align: 'Bl',
+        singleClick: true
+    });
+
+</script>

@@ -1,0 +1,13 @@
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="page-title">
+    <h1><?php echo Mage::registry('webform')->getName() ?></h1>
+</div>
+
+<?php
+$results_html = trim($this->getChildHtml('webforms_customer_account_results'));
+echo $results_html;
+?>
+
+<div id="webforms-customer-account-form" <?php if($results_html) echo 'style="display:none"'?>>
+    <?php echo $this->getChildHtml('webforms_customer_account_form') ?>
+</div>

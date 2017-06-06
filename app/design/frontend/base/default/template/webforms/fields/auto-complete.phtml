@@ -1,0 +1,27 @@
+<?php $hint = str_replace('"', '\"' , htmlspecialchars(trim($this->getField()->getHint()))); ?>
+<input id='<?php echo $this->getFieldId() ?>'
+       type='text'
+       name='<?php echo $this->getFieldName() ?>'
+       class='<?php echo $this->getFieldClass() ?>'
+       style='<?php echo $this->getFieldStyle() ?>'
+       placeholder="<?php echo $hint ?>"
+       aria-labelledby="label_<?php echo $this->getFieldId() ?>"
+       <?php if($this->getField()->getRequired()) {?>required<?php }?>
+       value='<?php echo htmlspecialchars($this->getFieldValue()); ?>'
+    <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>
+/>
+
+<script>
+    new autoComplete({
+        selector: 'input[name="<?php echo $this->getFieldName() ?>"]',
+        minChars: 2,
+        source: function (term, suggest) {
+            term = term.toLowerCase();
+            var choices = <?php echo json_encode($this->getChoices())?>;
+            var matches = [];
+            for (var i = 0; i < choices.length; i++)
+                if (~choices[i].toLowerCase().indexOf(term)) matches.push(choices[i]);
+            suggest(matches);
+        }
+    });
+</script>

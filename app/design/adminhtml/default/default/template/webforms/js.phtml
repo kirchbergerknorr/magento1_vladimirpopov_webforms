@@ -1,0 +1,32 @@
+<script type="text/javascript">
+    //<![CDATA[
+
+    // Bind tab changes
+    function bindActiveTab(event) {
+        if (event.tab && event.tab.name && $('store_switcher')) {
+            $('store_switcher').switchParams = 'active_tab/' + event.tab.name + '/';
+        }
+    }
+    varienGlobalEvents.attachEventHandler('showTab', bindActiveTab);
+
+    // bind active tab
+    <?php if ($tabsBlock = $this->getLayout()->getBlock($this->getData('tabs_block'))): ?>
+    if (
+        <?php echo $tabsBlock->getJsObjectName() ?> && <?php echo $tabsBlock->getJsObjectName() ?>.activeTab && $('store_switcher')
+    )
+    {
+        $('store_switcher').switchParams = 'active_tab/' +<?php echo $tabsBlock->getJsObjectName() ?>.
+        activeTab.name + '/';
+    }
+        <?php endif; ?>
+
+    // save and continue
+    var templateSyntax = /(^|.|\r|\n)({{(\w+)}})/;
+
+    function saveAndContinueEdit(urlTemplate) {
+        var template = new Template(urlTemplate, templateSyntax);
+        var url = template.evaluate({tab_id:<?php echo $this->getData('tabs_block')?>JsTabs.activeTab.name});
+        editForm.submit(url);
+    }
+    //]]>
+</script>

@@ -1,0 +1,26 @@
+<?php
+
+$startAt = $this->getField()->getStarsInit();
+
+if($this->getCustomerValue()){
+	$val = explode('/',$this->getCustomerValue());
+	$startAt = (int)$val[0];
+}
+
+?>
+
+<script>
+new Starry('<?php echo $this->getFieldId()?>',{
+		name:'<?php echo $this->getFieldName()?>',
+		showNull:false,
+		required:<?php echo $this->getField()->getRequired()?>,
+		startAt:<?php echo $startAt?>,
+		maxLength:<?php echo $this->getField()->getStarsCount()?>
+});
+</script>
+<?php
+    $validation_advice = Mage::helper('core')->__('This is a required field.');
+    if($this->getField()->getValidationAdvice())
+        $validation_advice = $this->getField()->getValidationAdvice();
+?>
+<div class="validation-advice" id="advice-required-entry-field[<?php echo $this->getField()->getId()?>]" style="display:none"><?php echo $validation_advice?></div>

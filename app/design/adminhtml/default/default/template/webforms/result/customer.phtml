@@ -1,0 +1,46 @@
+<?php 
+$customer_id = $this->getValue();
+$customer = false;
+$customer_text = '';
+if($customer_id){
+    $customer = Mage::getModel('customer/customer')->load($customer_id);
+    if(!$customer->getId()) $customer = false;
+}
+if($customer)
+    $customer_text = $customer->getName().' <'.$customer->getEmail().'>';
+?>
+<input id="customer_id" name="result[customer_id]" type="hidden" value="<?php echo $customer_id ?>" />
+<input id="customer" name="customer" value="" type="text" class="input-text" placeholder="<?php echo Mage::helper('webforms')->__('Guest');?>">
+<a id="customer_change" href="#" onclick="changeCustomer()" style="<?php if(!$customer){ ?>display: none<?php } ?>">[<?php echo Mage::helper('webforms')->__('Change')?>]</a>
+<p id="customer_comments" class="note"><?php echo Mage::helper('webforms')->__('Start typing customer name or e-mail address')?></p>
+<div id="customer-autocomplete" class="webforms-autocomplete"></div>
+
+<?php $url = Mage::helper('adminhtml')->getUrl('*/webforms_results/ajaxFindCustomer') ?>
+
+<script type="text/javascript">
+    new Ajax.Autocompleter("customer", "customer-autocomplete", "<?php echo $url?>", {
+        paramName: "search",
+        minChars: 3,
+        updateElement: function (li) {
+            $("customer").setValue(li.getAttribute("data-name") + " <" + li.getAttribute("data-email") + ">");
+            $("customer").disable();
+            $("customer_change").show();
+            $("customer_comments").hide();
+            $("customer_id").setValue(li.getAttribute("data-id"));
+        }
+    });
+
+    function changeCustomer(){
+        $("customer").clear();
+        $("customer").enable();
+        $("customer_comments").show();
+        $("customer_id").clear();
+        $("customer_change").hide();
+    }
+
+    <?php if($customer){?>
+    $("customer").setValue("<?php echo $customer_text?>");
+    $("customer").disable();
+    $("customer_comments").hide();
+    <?php }?>
+</script>

@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<widgets>
+	<webforms_form type="webforms/form" translate="name description" module="webforms">
+		<name>Web-forms: Form</name>
+		<description type="desc">Adds web-form to a page</description>
+		<parameters>
+			<webform_id>
+				<label>Web-form</label>
+				<visible>1</visible>
+				<required>1</required>
+				<type>select</type>
+				<source_model>webforms/webforms</source_model>
+			</webform_id>
+			<template translate="label">
+				<label>Frontend Template</label>
+				<visible>1</visible>
+				<required>1</required>
+				<type>select</type>
+				<values>
+					<default translate="label">
+						<value>webforms/default.phtml</value>
+						<label>Default</label>
+					</default>					
+					<multistep translate="label">
+						<value>webforms/multistep.phtml</value>
+						<label>Multistep (display fieldsets as steps)</label>
+					</multistep>
+                    <sidebar translate="label">
+						<value>webforms/sidebar.phtml</value>
+						<label>Sidebar (compact sidebar block)</label>
+					</sidebar>
+					<legacy translate="label">
+						<value>webforms/legacy.phtml</value>
+						<label>Legacy (Magento 1.3 and earlier)</label>
+					</legacy>
+					<acumen translate="label">
+						<value>webforms/acumen.phtml</value>
+						<label>Acumen (theme matching template)</label>
+					</acumen>
+				</values>
+			</template>
+			<after_submission_form>
+				<label>Display form after submission</label>
+                <description type="desc">Don't hide form after successful submission</description>
+				<visible>1</visible>
+				<required>1</required>
+				<type>select</type>
+				<source_model>adminhtml/system_config_source_yesno</source_model>
+			</after_submission_form>
+			<focus>
+				<label>Focus on web-form</label>
+				<visible>1</visible>
+				<required>1</required>
+				<type>select</type>
+				<source_model>adminhtml/system_config_source_yesno</source_model>
+			</focus>
+            <scroll_to>
+                <label>Scroll to success message</label>
+                <description type="desc">Scroll to the top of success message after form submission</description>
+                <visible>1</visible>
+                <required>1</required>
+                <type>select</type>
+                <source_model>adminhtml/system_config_source_yesno</source_model>
+            </scroll_to>
+		</parameters>
+	</webforms_form>
+	<webforms_results type="webforms/results" translate="name description" module="webforms">
+		<name>Web-forms: Results</name>
+		<description type="desc">Adds web-form collected results to a page</description>
+		<parameters>
+			<webform_id>
+				<label>Web-form</label>
+				<visible>1</visible>
+				<required>1</required>
+				<type>select</type>
+				<source_model>webforms/webforms</source_model>
+			</webform_id>
+			<page_size>
+				<label>Results per page</label>
+				<visible>1</visible>
+				<required>1</required>
+				<type>text</type>
+				<value>10</value>
+			</page_size>
+            <rating>
+                <label>Show rating</label>
+                <description type="desc">Show average result rating if available</description>
+                <visible>1</visible>
+                <type>select</type>
+                <source_model>adminhtml/system_config_source_yesno</source_model>
+                <value>1</value>
+            </rating>
+            <top_toolbar>
+                <label>Top toolbar</label>
+                <description type="desc">Display top toolbar</description>
+                <visible>1</visible>
+                <type>select</type>
+                <source_model>adminhtml/system_config_source_yesno</source_model>
+            </top_toolbar>
+            <bottom_toolbar>
+                <label>Bottom toolbar</label>
+                <description type="desc">Display bottom toolbar</description>
+                <visible>1</visible>
+                <type>select</type>
+                <source_model>adminhtml/system_config_source_yesno</source_model>
+                <value>1</value>
+            </bottom_toolbar>
+			<template translate="label">
+				<label>Frontend Template</label>
+				<visible>1</visible>
+				<required>1</required>
+				<type>select</type>
+				<values>
+					<default translate="label">
+						<value>webforms/results/default.phtml</value>
+						<label>Default</label>
+					</default>
+					<bubbles>
+						<value>webforms/results/bubbles.phtml</value>
+						<label>Bubbles</label>
+					</bubbles>
+				</values>
+			</template>
+		</parameters>
+	</webforms_results>
+</widgets>

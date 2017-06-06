@@ -1,0 +1,222 @@
+<?php
+/**
+ * @author         Vladimir Popov
+ * @copyright      Copyright (c) 2017 Vladimir Popov
+ */
+
+// in case redirect fails
+if (Mage::registry('redirect_url')) {
+    ?>
+    <meta http-equiv="refresh" content="0;url=<?php echo Mage::registry('redirect_url') ?>">
+    <script type="text/javascript">
+        window.location = '<?php echo Mage::registry('redirect_url')?>';
+    </script>
+<?php
+}
+
+// get temporary data
+$_uid = $this->getUid();
+$tmpData = Mage::getSingleton('core/session')->getData('webform_result_tmp_' . $this->getWebform()->getId());
+$tmpResult = new Varien_Object();
+if (!empty($tmpData['field']) && is_array($tmpData['field'])) {
+    foreach ($tmpData['field'] as $field_id => $value) {
+        $tmpResult->setData('field_' . $field_id, $value);
+    }
+}
+
+if ($this->getWebform()->getIsActive() == VladimirPopov_WebForms_Model_Webforms::STATUS_DISABLED || !$this->isDirectAvailable()) {
+    echo $this->getNotAvailableMessage();
+} else {?>
+
+    <?php if ($this->isAjax()) { ?>
+    <div id="webform_<?php echo $_uid ?>_success_text" class="webforms-success-text" style="display:none"></div>
+    <?php } ?>
+
+
+
+    <div  id="webform_<?php echo $_uid ?>_form" class="block block-form">
+    <div class="block-title"><strong><span><?php echo $this->getWebform()->getName(); ?></span></strong></div>
+
+    <div class="block-content">
+
+            <?php if (Mage::registry('show_success')) { ?>
+                <div class="std webforms-success-text">
+                    <?php echo $this->getWebform()->getSuccessText() ?>
+                </div>
+            <?php } ?>
+
+            <?php if ($this->getWebform()->getDescription()) { ?>
+                <div class="description">
+                    <?php echo $this->getWebform()->getDescription(); ?>
+                </div>
+            <?php } ?>
+
+            <?php if ($this->isAjax()) { ?>
+                <iframe id="webform_<?php echo $_uid ?>_iframe"
+                        name="webform_<?php echo $_uid ?>_iframe"
+                        style="width:0;height:0;border:0;position:absolute"></iframe>
+            <?php } ?>
+
+            <form action="<?php echo $this->getFormAction() ?>" method="post"
+                  name="webform_<?php echo $_uid ?>"
+                  id="webform_<?php echo $_uid ?>" enctype="<?php echo $this->getEnctype() ?>"
+                  class="webforms-<?php echo $this->getWebform()->getCode() ?>"
+                  <?php if ($this->isAjax()) { ?>target="webform_<?php echo $_uid ?>_iframe"<?php } ?>>
+
+
+                <input name="form_key" type="hidden" value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
+                <input type="hidden" name="submitWebform_<?php echo $this->getWebform()->getId() ?>" value="1"/>
+                <input type="hidden" name="webform_id" value="<?php echo $this->getWebform()->getId() ?>"/>
+
+                <?php if (is_array($this->getData('hidden'))) {
+                    foreach ($this->getData('hidden') as $key => $value) {
+                        ?>
+                        <input type="hidden" name="<?php echo $key ?>" value="<?php echo $value ?>"/>
+                    <?php
+                    }
+                }?>
+
+                <?php if (count($this->getWebform()->_getHidden())) {
+                    foreach ($this->getWebform()->_getHidden() as $field) {
+                        echo $field->toHtml();
+                    }
+                } ?>
+
+                <?php
+                foreach ($this->getWebform()->_getFieldsToFieldsets() as $fieldset_id => $fieldset) {
+                    ?>
+                            <?php
+                            foreach ($fieldset['fields'] as $field) {
+
+                                // set temporary value
+                                $field->setData('result', $tmpResult);
+
+                                $field_class = "field";
+                                ?>
+                                <div id="field_<?php echo $field->getId() ?>"
+                                     class="<?php echo $field_class ?> webforms-fields-<?php echo $field->getId() ?><?php if ($field->getCode()) { ?> webforms-fields-<?php echo $field->getCode();
+                                     }?>"
+                                    <?php if ($field->getData('logic_visibility') == VladimirPopov_WebForms_Model_Logic::VISIBILITY_HIDDEN) echo 'style="display:none"'; ?>>
+
+                                    <?php if ($field->getType() != 'html' && $field->getType() != 'subscribe') { ?>
+                                        <label for="field<?php echo $field->getId() ?>"
+                                               <?php if ($field->getRequired()) { ?>class="required"<?php } ?>>
+                                            <?php if ($field->getRequired()) { ?>
+                                                <em>*</em>
+                                            <?php } ?>
+                                            <?php echo $field->getName() ?>
+                                            <?php 
+                                                $tooltip = $field->getTooltip(); 
+                                                if($tooltip){
+                                                    echo $this->getLayout()->createBlock(
+                                                        'core/template',
+                                                        'field' . $field->getId() . '_tooltip',
+                                                        array(
+                                                            'title' => $field->getName(),
+                                                            'tooltip' => $tooltip,
+                                                            'template' => 'webforms/scripts/tooltip.phtml',
+                                                        )
+                                                    )->toHtml();
+                                                }
+                                            ?>
+                                        </label>
+                                    <?php } ?>
+
+                                    <div class="input-box">
+                                        <?php echo $field->toHtml(); ?>
+
+                                        <?php if ($field->getComment()) { ?>
+                                            <p class="webforms-fields-comment">
+                                                <?php echo nl2br($field->getComment()) ?>
+                                            </p>
+                                        <?php } ?>
+                                        <?php if ($field->getValidationAdvice()){?>
+                                            <div style="display:none" class="validation-advice" id="advice-required-entry-field<?php echo $field->getId()?>">
+                                                <?php echo $field->getValidationAdvice()?>
+                                            </div>
+                                        <?php }?>
+                                    </div>
+
+                                </div>
+
+                <?php
+                }} // foreach 'fields_to_fieldsets'
+                ?>
+
+                <?php if (Mage::registry('use_captcha')) { ?>
+                    <div class="fieldset">
+                        <h2 class="legend">Captcha</h2>
+                        <ul class="form-list">
+                            <li class="fields">
+                                <div class="field">
+                                    <?php echo $this->getCaptcha()->getHTML() ?>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                <?php } ?>
+
+                <?php if (Mage::getStoreConfig('webforms/honeypot/enable')) {
+                    echo $this->getLayout()->createBlock(
+                        'core/template',
+                        'webform_' . $_uid . '_honeypot',
+                        array(
+                            'webform' => $this->getWebform(),
+                            'template' => 'webforms/scripts/honeypot.phtml',
+                        )
+                    )->toHtml();
+                }?>
+                <p class="required"><?php echo $this->__('* Required Fields') ?></p>
+
+
+
+            </form>
+
+        </div>
+                <div class="actions">
+                    <button type="button" class="button"
+                            id="webform_<?php echo $_uid ?>_submit_button"
+                            title="<?php echo $this->__('submit') ?>">
+                        <span>
+                            <span><?php echo $this->__($this->getWebform()->getSubmitButtonText()) ?></span>
+                        </span>
+                    </button>
+                    <span class="please-wait" id="webform_<?php echo $_uid ?>_sending_data"
+                          style="display:none;">
+                        <img src="<?php echo $this->getSkinUrl('images/opc-ajax-loader.gif') ?>"
+                             alt="<?php echo $this->__('Sending...') ?>" title="<?php echo $this->__('Sending...') ?>"
+                             class="v-middle"/><span
+                            id="webform_<?php echo $_uid ?>_progress_text"><?php echo $this->__('Sending...') ?></span>
+                    </span>
+                </div>
+
+        </div>
+
+        <?php echo $this->getLayout()->createBlock(
+            'core/template',
+            'webform_' . $_uid . '_submit_script',
+            array(
+                'uid' => $_uid,
+                'webform' => $this->getWebform(),
+                'ajax' => $this->isAjax(),
+                'template' => 'webforms/scripts/submit.phtml',
+                'scroll_to' => $this->getData('scroll_to'),
+                'after_submission_form' => $this->getData('after_submission_form')
+            )
+        )->toHtml();
+        ?>
+
+        <?php echo $this->getLayout()->createBlock(
+            'core/template',
+            'webform_' . $_uid . '_logic',
+            array(
+                'uid' => $_uid,
+                'webform' => $this->getWebform(),
+                'template' => 'webforms/scripts/logic.phtml',
+            )
+        )->toHtml();
+        ?>
+
+    <?php
+} // is active
+?>

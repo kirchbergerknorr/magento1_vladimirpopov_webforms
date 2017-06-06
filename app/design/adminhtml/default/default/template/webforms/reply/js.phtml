@@ -1,0 +1,85 @@
+<script type="text/javascript">
+//<![CDATA[
+
+function deleteMessage(messageId){
+	if(confirm('<?php echo $this->__('Delete this message?')?>')){
+		new Ajax.Request('<?php echo $this->getUrl('*/webforms_message/ajaxDelete')?>',{
+			parameters :{
+				id: messageId
+			},
+			method: 'post',
+			onSuccess: function(transport){
+				new Effect.DropOut('history-message-'+messageId);
+			}
+		});
+	}
+}
+
+function emailMessage(messageId){
+	if(confirm('<?php echo $this->__('E-mail this message?')?>')){
+		new Ajax.Request('<?php echo $this->getUrl('*/webforms_message/ajaxEmail')?>',{
+			parameters :{
+				id: messageId
+			},
+			method: 'post',
+			onSuccess: function(transport){
+				var json = transport.responseText.evalJSON();
+				if(json.success){
+					$('subdue-'+messageId).update('<?php echo $this->helper('webforms')->__('E-mailed') ?> <img src="<?php echo $this->getSkinUrl('images/ico_success.gif') ?>" width="16" height="16" alt="" />');
+					alert('<?php echo $this->__('E-mail has been sent.')?>');
+				} else {
+					alert(json.errors);
+				}
+			}
+		});
+	}	
+}
+
+function insertAtCursor(myFieldName, myValue) {
+	var myField = $(myFieldName);
+	
+	//IE support
+	if (document.selection) {
+		myField.focus();
+		sel = document.selection.createRange();
+		sel.text = myValue;
+		
+	//MOZILLA/NETSCAPE support
+	}else if (myField.selectionStart || myField.selectionStart == '0') {
+
+		var startPos = myField.selectionStart;
+		var endPos = myField.selectionEnd;
+		myField.value = myField.value.substring(0, startPos)+ myValue+ myField.value.substring(endPos, myField.value.length);
+	
+	} else {
+		myField.value += myValue;
+	}
+	
+	if(tinyMCE){
+		tinyMCE.execInstanceCommand(myFieldName,"mceInsertContent",false,myValue);
+	}
+} 
+
+Event.observe(window, 'load', function() {
+	
+	$('quickresponse_button').onclick = function(){
+		if($('quick_response').selectedIndex){
+			new Ajax.Request('<?php echo $this->getUrl('*/webforms_quickresponse/getAjaxMessage')?>',{
+				parameters: {
+					id: $('quick_response').getValue()
+				},
+				method:'post',
+				onSuccess: function(transport){
+					var response = transport.responseText || '';
+					insertAtCursor('message', response);
+				}
+			});
+		}else{
+			alert('<?php echo $this->__('Please select quick response from the list') ?>')
+		}
+	}
+	
+});
+
+//]]>
+</script>

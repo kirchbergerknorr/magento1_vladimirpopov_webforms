@@ -1,0 +1,61 @@
+<?php
+$result = false;
+if ($this->getResult())
+    if ($this->getResult()->getId())
+        $result = $this->getResult()->addFieldArray();
+$webform = $this->getWebform();
+$logic_rules = $webform->getLogic();
+$fields_to_fieldsets = $webform->getFieldsToFieldsets(false);
+$targets = $webform->_getLogicTarget();
+$prefix = $this->getPrefix();
+if (!$prefix) $prefix = 'result';
+?>
+<script language="JavaScript">
+    Event.observe(window, 'load', function () {
+        var logicRules_<?php echo $webform->getId()?> = [];
+        var targets_<?php echo $webform->getId()?> = <?php echo json_encode($targets)?>;
+
+        <?php
+        foreach ($targets as $target) {
+            $field_array = array();
+            if($result) $field_array = $result->getData('field');
+            if ($target["id"] != 'field_' && !$webform->getLogicTargetVisibility($target, $logic_rules, $field_array)) {
+        ?>
+        $('<?php echo $target["id"]?>_container').hide();
+
+        <?php
+            }
+        }
+
+        foreach ($logic_rules as $logic) {
+            if ($logic->getIsActive()) {
+                ?>
+        logicRules_<?php echo $webform->getId()?>.push({
+            'field_id': '<?php echo $logic->getFieldId()?>',
+            'action': '<?php echo $logic->getAction()?>',
+            'logic_condition': '<?php echo $logic->getLogicCondition()?>',
+            'aggregation': '<?php echo $logic->getAggregation()?>',
+            'value':<?php echo json_encode($logic->getValue())?>,
+            'target':<?php echo json_encode($logic->getTarget())?>
+        });
+        <?php
+            }
+        }
+        ?>
+        Admin_JSWebFormsLogic(targets_<?php echo $webform->getId()?>, logicRules_<?php echo $webform->getId()?>, '<?php echo $prefix?>');
+
+        // set correct field visibility
+        for (var i = 0; i < targets_<?php echo $webform->getId()?>.length; i++)
+            Admin_JsWebFormsLogicTargetCheck(targets_<?php echo $webform->getId()?>[i], logicRules_<?php echo $webform->getId()?>, '<?php echo $prefix?>');
+
+        // set correct field visibility for customer information form
+        var customer_info_tab = $('customer_info_tabs_account');
+        if(customer_info_tab){
+            customer_info_tab.observe("click",function(){
+                for (var i = 0; i < targets_<?php echo $webform->getId()?>.length; i++)
+                    Admin_JsWebFormsLogicTargetCheck(targets_<?php echo $webform->getId()?>[i], logicRules_<?php echo $webform->getId()?>, '<?php echo $prefix?>');
+            });
+        }
+    });
+</script>
+

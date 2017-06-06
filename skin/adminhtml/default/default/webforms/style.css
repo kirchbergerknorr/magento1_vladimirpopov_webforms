@@ -1,0 +1,131 @@
+/* Star ratings */
+
+.stars {
+	padding:1px 0;
+	width:80px;
+}
+
+.stars-bar {
+	list-style:none;
+	margin: 0px;
+	padding:0px;
+	height: 16px;
+	position: relative;
+	background: url(stars.png) top left repeat-x;		
+}
+
+.stars-bar li{
+	padding:0px;
+	margin:0px;
+	/*\*/
+	float: left;
+	/* */
+}
+
+.stars-bar li.stars-value {
+	background: url(stars.png) left bottom;
+	position: absolute;
+	height: 16px;
+	display: block;
+	z-index: 1;
+}
+
+/* Replied status */
+
+.result-replied{
+	padding-left: 16px;
+	background: url(bullet-replied.png) left top no-repeat;
+}
+
+.result-not-replied{
+	padding-left: 16px;
+}
+
+/* Grid statuses */
+
+.grid-status{
+	display: block;
+	height: 16px;
+	background:#ddd;
+	border-radius: 12px;
+	font: bold 10px/16px Arial, Helvetica, sans-serif;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 0 10px;
+	margin: 1px 1px;
+	white-space: nowrap;
+	color: white;
+}
+
+.notapproved {
+	background:#e51b3c;
+}
+
+.approved, .completed {
+	background:#04ba04;
+}
+
+.pending {
+	background:#ff9c05;
+}
+
+/* Grid actions */
+
+.grid-button-action{display: block;
+	height: 16px;
+	background:#ddd;
+	border-radius: 12px;
+	font: bold 10px/16px Arial, Helvetica, sans-serif;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 0 10px;
+	margin: 5px 1px;
+	white-space: nowrap;
+	color: #888;
+	text-decoration: none;
+}
+.grid-button-action:hover{
+    color: #fff;
+    background: #666666;;
+    text-decoration: none;
+}
+.reject, .approve, .complete {
+    margin: 5px 10px;
+}
+
+.reject:hover{
+	background:#FF0000;
+}
+
+.approve:hover, .complete:hover{
+	background: #7ccd7b;
+}
+
+.inline-buttons {width:145px; float:right;}
+.inline-action { float:left; display: inline; width:50px;}
+
+/* Autocomplete */
+
+.webforms-autocomplete{
+	background-color: white;
+	border: 1px solid #888;
+	-webkit-border-horizontal-spacing: 0;
+}
+.webforms-autocomplete ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0 !important;
+}
+.webforms-autocomplete ul li.selected {
+	background-color: #eee;
+}
+.webforms-autocomplete ul li {
+	list-style-type: none;
+	display: block;
+	margin: 0 !important;
+	padding: 2px;
+	height: 16px;
+	cursor: pointer;
+	line-height: 14px;
+	font-size: 12px;
+}

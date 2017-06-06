@@ -1,0 +1,41 @@
+<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="dashboard">
+    <?php
+    /** @var VladimirPopov_WebForms_Model_Results $result */
+    $result = $this->getResult();
+    $messages = $this->getMessages();
+    if ($result->getId()) {
+        ?>
+        <div class="page-title">
+            <h1><?php echo $result->getEmailSubject() ?></h1>
+        </div>
+
+        <?php foreach ($messages as $message): ?>
+            <div class="box-account webforms-customer-account-message">
+                <div class="box">
+                    <div class="box-title">
+                        <h3><?php echo Mage::helper('webforms')->__('Replied by %s on %s', $message->getAuthor(), Mage::helper('core')->formatDate($message->getCreatedTime(), 'medium')) ?></h3>
+                    </div>
+                    <div class="box-content">
+                        <?php echo $message->getMessage() ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+        <div class="box-account webforms-customer-account-result-view">
+            <div class="box">
+                <div class="box-title">
+                    <h3><?php echo Mage::helper('webforms')->__('You submitted:') ?></h3>
+                </div>
+                <div class="box-content">
+                    <?php echo $result->toHtml('customer'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="buttons-set">
+            <p class="back-link"><a href="javascript:window.history.back()">
+                    <small>&laquo; </small><?php echo $this->__('Back') ?></a></p>
+        </div>
+    <?php } ?>
+</div>

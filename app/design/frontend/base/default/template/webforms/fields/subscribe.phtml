@@ -1,0 +1,33 @@
+<?php
+$validate = '';
+$checked = '';
+if ($this->getField()->getRequired()) {
+    $validate = "validate-one-required-by-name";
+}
+if ($this->getField()->isCheckedOption($this->getLabel())) {
+    $checked = "checked";
+}
+$label = $this->__('Sign Up for Newsletter');
+if ($this->getField()->getCheckedOptionValue($this->getLabel()))
+    $label = $this->getField()->getCheckedOptionValue($this->getLabel());
+?>
+
+<input style='float:left' type='checkbox' name='<?php echo $this->getFieldName() ?>'
+       id='<?php echo $this->getFieldId() . 0 ?>' value="1"
+       class='checkbox <?php echo $validate ?>' <?php echo $checked ?>/>
+<label for='<?php echo $this->getFieldId() . 0 ?>' class='<?php echo $this->getFieldClass() ?>'
+       style='<?php echo $this->getFieldStyle() ?>'><?php echo $label ?></label>
+<?php 
+    $tooltip = $this->getField()->getTooltip(); 
+    if($tooltip){
+        echo '&nbsp;'.$this->getLayout()->createBlock(
+            'core/template',
+            'field' . $this->getField()->getId() . '_tooltip',
+            array(
+                'title' => $label,
+                'tooltip' => $tooltip,
+                'template' => 'webforms/scripts/tooltip.phtml',
+            )
+        )->toHtml();
+    }
+?>

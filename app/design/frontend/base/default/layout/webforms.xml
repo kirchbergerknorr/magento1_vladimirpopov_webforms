@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+
+    <webforms_index_index>
+
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/1column.phtml</template>
+            </action>
+        </reference>
+
+        <reference name="content">
+            <block type="webforms/webforms" name="webforms" template="webforms/default.phtml"/>
+        </reference>
+
+    </webforms_index_index>
+
+    <customer_account>
+
+        <reference name="left">
+            <block type="webforms/customer_account_navigation" name="webforms_customer_account_navigation"
+                   after="customer_account_navigation" template="webforms/customer/account/navigation.phtml"/>
+        </reference>
+
+    </customer_account>
+
+    <webforms_customer_account>
+
+        <update handle="customer_account"/>
+
+        <reference name="content">
+            <block type="webforms/customer_account" name="webforms_customer_account"
+                   template="webforms/customer/account.phtml">
+                <block type="webforms/customer_account_results" name="webforms_customer_account_results"
+                       template="webforms/customer/account/results.phtml"/>
+                <block type="webforms/webforms" name="webforms_customer_account_form"
+                       template="webforms/default.phtml"/>
+            </block>
+        </reference>
+    </webforms_customer_account>
+
+    <webforms_customer_result>
+
+        <update handle="customer_account"/>
+
+        <reference name="head">
+            <action method="addCss">
+                <stylesheet>webforms/customer.css</stylesheet>
+            </action>
+        </reference>
+
+        <reference name="content">
+
+            <block type="webforms/customer_account_result_view" name="webforms_customer_account_result_view"
+                   template="webforms/customer/account/result/view.phtml"/>
+        </reference>
+    </webforms_customer_result>
+
+</layout>

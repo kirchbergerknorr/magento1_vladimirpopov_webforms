@@ -1,0 +1,11 @@
+<?php $hint = str_replace('"', '\"' , htmlspecialchars(trim($this->getField()->getHint()))); ?>
+
+<input type='number' name='<?php echo $this->getFieldName() ?>' id='<?php echo $this->getFieldId() ?>'
+       class='<?php echo $this->getFieldClass() ?>' style='<?php echo $this->getFieldStyle() ?>'
+       value="<?php echo htmlspecialchars($this->getFieldValue()); ?>"
+       placeholder="<?php echo $hint?>"
+       aria-labelledby="label_<?php echo $this->getFieldId() ?>"
+       <?php if($this->getField()->getRequired()) {?>required<?php }?>
+    <?php if (strlen($this->getMin())) echo "min=" . $this->getMin(); ?>
+    <?php if (strlen($this->getMax())) echo "max=" . $this->getMax(); ?>
+    <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>/>

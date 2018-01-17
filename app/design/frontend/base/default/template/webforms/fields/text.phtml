@@ -7,7 +7,8 @@
        placeholder="<?php echo $hint?>"
        value='<?php echo htmlspecialchars($this->getFieldValue()); ?>'
        aria-labelledby="label_<?php echo $this->getFieldId() ?>"
-       <?php if($this->getField()->getRequired()) {?>required<?php }?>
+       <?php if($this->getField()->getBrowserAutocomplete()) { ?>autocomplete="<?php echo $this->getField()->getBrowserAutocomplete()?>" <?php }?>
+       <?php if($this->getField()->getRequired()) {?>aria-required="true"<?php }?>
        <?php if ($this->getField()->getType() == 'email'){ ?>onkeyup="if(this.value.search(' ')>=0){this.value = this.value.replace(' ','');}"<?php } ?>
        <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>
 />

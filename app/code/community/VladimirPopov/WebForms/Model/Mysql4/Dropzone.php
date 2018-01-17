@@ -1,9 +1,9 @@
 <?php
-class VladimirPopov_WebForms_Model_Mysql4_Files
+class VladimirPopov_WebForms_Model_Mysql4_Dropzone
     extends Mage_Core_Model_Mysql4_Abstract
 {
     public function _construct(){
-        $this->_init('webforms/files','id');
+        $this->_init('webforms/dropzone','id');
     }
 
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -20,7 +20,7 @@ class VladimirPopov_WebForms_Model_Mysql4_Files
 
         @unlink($object->getFullPath());
 
-        Mage::dispatchEvent('webforms_files_delete', array('file' => $object));
+        Mage::dispatchEvent('webforms_dropzone_delete', array('file' => $object));
 
         return parent::_beforeDelete($object);
     }

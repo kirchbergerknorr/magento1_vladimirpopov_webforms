@@ -22,7 +22,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Design
         $form->setFieldNameSuffix('field');
         $form->setDataObject(Mage::registry('field'));
         $this->setForm($form);
-        $fieldset = $form->addFieldset('webforms_form', array(
+        $fieldset = $form->addFieldset('design', array(
             'legend' => Mage::helper('webforms')->__('Design')
         ));
 
@@ -52,7 +52,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Design
             'note' => Mage::helper('webforms')->__('Add custom stylization to the input element')
         ));
 
-        $fieldset = $form->addFieldset('field_result', array(
+        $fieldset = $form->addFieldset('result', array(
             'legend' => Mage::helper('webforms')->__('Results / Notifications')
         ));
 
@@ -62,6 +62,16 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Design
             'name' => 'result_display',
             'note' => Mage::helper('webforms')->__('Display field in result / notification messages'),
             'values' => Mage::getModel('webforms/fields_display')->toOptionArray(),
+        ));
+
+        $fieldset = $form->addFieldset('browser', array(
+            'legend' => Mage::helper('webforms')->__('Browser')
+        ));
+
+        $fieldset->addField('browser_autocomplete', 'text', array(
+            'label' => Mage::helper('webforms')->__('Browser autocomplete'),
+            'name' => 'browser_autocomplete',
+            'note' => Mage::helper('webforms')->__('This attribute can be used across web-sites to pre-fill field with commonly used data such as name, email, telephone etc. This feature engages when user starts typing.')
         ));
 
         Mage::dispatchEvent('webforms_adminhtml_fields_edit_tab_design_prepare_form', array('form' => $form, 'fieldset' => $fieldset));

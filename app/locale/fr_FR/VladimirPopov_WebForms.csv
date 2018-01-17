@@ -395,4 +395,5 @@
 "Set CSS classes for the container element that holds Label and Input elements", "Classes CSS pour l'élément conteneur d'étiquettes et ééments de saisies"
 "CSS classes for the Input element", "Classes CSS pour l'élément de saisie"
 "Select values should be separated with new line<br>Use <i>^Option Text</i> to check default<br>Use <i>Option Text {{null}}</i> to create option without value</i><br>Use <i>Option Text {{val ...}}</i> to set different option value", "Les options de sélection doivent être séparées, une par ligne<br>Utiliser <i>^Votre texte</i> pour régler la valeur par défaut<br>Utilisez <i>Votre texte {{null}}</i> pour créer des options sans valeurs</i><br>Utiliser <i>Votre texte {{val ...}}</i> pour paramétrer les valeurs des différentes options"
+"* Required Fields", "* Champs obligatoires"
 

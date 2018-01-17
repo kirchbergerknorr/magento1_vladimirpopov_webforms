@@ -6,7 +6,7 @@
        style='<?php echo $this->getFieldStyle() ?>'
        placeholder="<?php echo $hint ?>"
        aria-labelledby="label_<?php echo $this->getFieldId() ?>"
-       <?php if($this->getField()->getRequired()) {?>required<?php }?>
+       <?php if($this->getField()->getRequired()) {?>aria-required="true"<?php }?>
        value='<?php echo htmlspecialchars($this->getFieldValue()); ?>'
     <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>
 />

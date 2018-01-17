@@ -2,7 +2,6 @@
 
 class VladimirPopov_WebForms_Block_Adminhtml_Element_Image extends VladimirPopov_WebForms_Block_Adminhtml_Element_File
 {
-
     protected function _getPreviewHtml()
     {
         $html = '';
@@ -13,15 +12,39 @@ class VladimirPopov_WebForms_Block_Adminhtml_Element_Image extends VladimirPopov
                 ->addFilter('result_id', $result->getId())
                 ->addFilter('field_id', $field_id);
             /** @var VladimirPopov_WebForms_Model_Files $file */
-            foreach ($files as $file) {
-                if(file_exists($file->getFullPath())) {
-                    $thumbnail = $file->getThumbnail(100);
-                    if ($thumbnail) {
-                        $html .= '<div><img src="' . $thumbnail . '"/></div>';
+            $width = Mage::getStoreConfig('webforms/images/grid_thumbnail_width');
+            $height = Mage::getStoreConfig('webforms/images/grid_thumbnail_height');
+
+            if (count($files)) {
+                $html .= '<div class="webforms-file-pool">';
+                $html .= $this->_getSelectAllHtml();
+                foreach ($files as $file) {
+                    $html .= '<div class="webforms-file-cell">';
+
+                    if (file_exists($file->getFullPath())) {
+                        $nameStart = '<div class="webforms-file-link-name">' . substr($file->getName(), 0, strlen($file->getName()) - 7) . '</div>';
+                        $nameEnd = '<div class="webforms-file-link-name-end">' . substr($file->getName(), -7) . '</div>';
+
+                        $thumbnail = $file->getThumbnail(100);
+                        if ($thumbnail) {
+                            $html .= '<a class="grid-button-action webforms-file-link" href="' . $file->getDownloadLink(true) . '">
+                            <figure>
+                                <p><img src="' . $file->getThumbnail($width, $height) . '"/></p>
+                                <figcaption>' . $file->getName() . ' <small>[' . $file->getSizeText() . ']</small></figcaption>
+                            </figure>
+                        </a>';
+                        } else {
+                            $html .= '<nobr><a class="grid-button-action webforms-file-link" href="' . $file->getDownloadLink(true) . '">' . $nameStart . $nameEnd . ' <small>[' . $file->getSizeText() . ']</small></a></nobr>';
+                        }
                     }
-                    $html .= '<nobr><a href="' . $file->getDownloadLink() . '">' . $file->getName() . '</a> <small>[' . $file->getSizeText() . ']</small></nobr><br>';
+                    $html .= $this->_getDeleteCheckboxHtml($file);
+
+                    $html .= '</div>';
+
                 }
+                $html .= '</div>';
             }
+
         }
         return $html;
 

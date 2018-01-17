@@ -1,5 +1,6 @@
 <?php $_countries = Mage::getResourceModel('directory/country_collection')->loadByStore(Mage::app()->getStore())->toOptionArray(false) ?>
-<?php 
+
+<?php
 // set default country if found
 $customer = Mage::helper('customer')->getCustomer();
 if($customer){
@@ -16,7 +17,8 @@ if($customer){
             class='<?php echo $this->getFieldClass()?>'
             style='<?php echo $this->getFieldStyle()?>' <?php if($this->getField()->getDisabled()){?> disabled <?php } ?>>
             aria-labelledby="label_<?php echo $this->getFieldId() ?>"
-            <?php if($this->getField()->getRequired()) {?>required<?php }?>>
+        <?php if($this->getField()->getBrowserAutocomplete()) { ?>autocomplete="<?php echo $this->getField()->getBrowserAutocomplete()?>" <?php }?>
+        <?php if($this->getField()->getRequired()) {?>aria-required="true"<?php }?>>
         <option value=""><?php echo Mage::helper('webforms')->__('-- Please Select --');?></option>
         <?php foreach($_countries as $_country): ?>
             <?php $selected = ($this->getFieldValue() == $_country['value']) ? 'selected="selected"' : ''; ?>

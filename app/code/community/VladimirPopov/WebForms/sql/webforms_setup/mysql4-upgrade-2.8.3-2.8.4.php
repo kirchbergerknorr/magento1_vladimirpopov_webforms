@@ -9,20 +9,16 @@ $installer = $this;
 
 $installer->startSetup();
 
-$installer->getConnection()->dropTable($installer->getTable('webforms/files'));
+$installer->getConnection()->dropTable($installer->getTable('webforms/dropzone'));
 
 $table = $installer->getConnection()
-    ->newTable($installer->getTable('webforms/files'))
+    ->newTable($installer->getTable('webforms/dropzone'))
     ->addColumn('id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, array(
         'identity' => true,
         'unsigned' => true,
         'nullable' => false,
         'primary' => true,
     ), 'Id')
-    ->addColumn('result_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, array(
-        'nullable' => false,
-        'unsigned' => true,
-    ), 'Result ID')
     ->addColumn('field_id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, array(
         'nullable' => false,
         'unsigned' => true,
@@ -40,26 +36,42 @@ $table = $installer->getConnection()
     ->addColumn('path', Varien_Db_Ddl_Table::TYPE_TEXT, null, array(
         'nullable' => false
     ), 'File Path')
-    ->addColumn('link_hash', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, array(
+    ->addColumn('hash', Varien_Db_Ddl_Table::TYPE_VARCHAR, 255, array(
         'nullable' => false
-    ), 'Link Hash')
+    ), 'Hash')
     ->addColumn('created_time', Varien_Db_Ddl_Table::TYPE_DATETIME, null, array(
             'nullable' => false
         )
     );
 
-$table->addForeignKey(
-    $installer->getFkName('webforms/files', 'result_id', 'webforms/results', 'id'),
-    'result_id',
-    $installer->getTable('webforms/results'),
-    'id');
-
-$table->addForeignKey(
-    $installer->getFkName('webforms/files', 'field', 'webforms/fields', 'id'),
-    'field_id',
-    $installer->getTable('webforms/fields'),
-    'id');
-
 $installer->getConnection()->createTable($table);
+
+$installer->getConnection()
+    ->addColumn(
+        $this->getTable('webforms/fields'),
+        'validate_unique',
+        'TINYINT ( 1 )'
+    );
+
+$installer->getConnection()
+    ->addColumn(
+        $this->getTable('webforms/fields'),
+        'validate_unique_message',
+        'TEXT'
+    );
+
+$installer->getConnection()
+    ->addColumn(
+        $this->getTable('webforms/fields'),
+        'browser_autocomplete',
+        'TEXT'
+    );
+
+$installer->getConnection()
+    ->addColumn(
+        $this->getTable('webforms'),
+        'frontend_download',
+        'TINYINT ( 1 )'
+    );
 
 $installer->endSetup();

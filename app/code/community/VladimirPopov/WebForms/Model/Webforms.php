@@ -148,7 +148,7 @@ class VladimirPopov_WebForms_Model_Webforms
 
     public function getFieldsToFieldsets($all = false, VladimirPopov_WebForms_Model_Results $result = null)
     {
-        if($this->_fields_to_fieldsets) return $this->_fields_to_fieldsets;
+        if ($this->_fields_to_fieldsets) return $this->_fields_to_fieldsets;
 
         $logic_rules = $this->getLogic(true);
 
@@ -319,13 +319,13 @@ class VladimirPopov_WebForms_Model_Webforms
 
     public function getDashboardGroups()
     {
-        if($this->getData('dashboard_groups')) return $this->getData('dashboard_groups');
+        if ($this->getData('dashboard_groups')) return $this->getData('dashboard_groups');
         return array();
     }
 
     public function getAccessGroups()
     {
-        if($this->getData('access_groups')) return $this->getData('access_groups');
+        if ($this->getData('access_groups')) return $this->getData('access_groups');
         return array();
     }
 
@@ -508,14 +508,14 @@ class VladimirPopov_WebForms_Model_Webforms
         return $form;
     }
 
-    protected function getUploadFields()
+    public function getUploadFields()
     {
         $upload_fields = array();
         foreach ($this->getFieldsToFieldsets() as $fieldset_id => $fieldset) {
             if (isset($fieldset['fields']))
                 foreach ($fieldset['fields'] as $field) {
                     if ($field->getType() == 'file' || $field->getType() == 'image')
-                        $upload_fields[] = $field->getId();
+                        $upload_fields[] = $field;
                 }
         }
         return $upload_fields;
@@ -525,7 +525,8 @@ class VladimirPopov_WebForms_Model_Webforms
     {
         $uploaded_files = array();
         $upload_fields = $this->getUploadFields();
-        foreach ($upload_fields as $field_id) {
+        foreach ($upload_fields as $field) {
+            $field_id = $field->getId();
             $file_id = 'file_' . $field_id;
             $uploader = new Zend_Validate_File_Upload;
             $valid = $uploader->isValid($file_id);
@@ -591,9 +592,75 @@ class VladimirPopov_WebForms_Model_Webforms
         // check custom validation
         $logic_rules = $this->getLogic();
         $fields_to_fieldsets = $this->getFieldsToFieldsets();
+        $fields_to_fieldsets['hidden']['fields'] = $this->_getHidden();
+        $fields_to_fieldsets['hidden']['logic_visibility'] = true;
         foreach ($fields_to_fieldsets as $fieldset_id => $fieldset)
             foreach ($fieldset['fields'] as $field) {
-                if ($field->getIsActive() && $field->getValidateRegex() && $field->getRequired()) {
+
+                $hint = htmlspecialchars(trim($field->getHint()));
+
+                $requiredFailed = false;
+
+                if ($field->getRequired() && empty($postData[$field->getId()]) && $field->getType() == 'hidden') {
+                    $requiredFailed = true;
+                    $errorMsg = $field->getValidationAdvice() ? $field->getValidationAdvice() : Mage::helper('webforms')->__('%s is required', $field->getName());
+                    if (!in_array($errorMsg, $errors))
+                        $errors[] = $errorMsg;
+                }
+
+                if ($field->getRequired() && is_array($postData) && $field->getType() != 'file' && $field->getType() != 'image') {
+                    $dataMissing = true;
+
+                    foreach ($postData as $key => $value) {
+                        if (is_array($value)) {
+                            $value = implode("\n", $value);
+                        }
+                        $value = trim(strval($value));
+
+                        if ($key == $field->getId()) {
+                            $dataMissing = false;
+                        }
+                        if (
+                            $key == $field->getId()
+                            &&
+                            ($value == $hint || $value == '')
+                        ) {
+                            // check logic visibility
+                            $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
+                            $target_fieldset = array("id" => 'fieldset_' . $fieldset_id, 'logic_visibility' => $fieldset['logic_visibility']);
+
+                            if (
+                                $this->getLogicTargetVisibility($target_field, $logic_rules, $postData) &&
+                                $this->getLogicTargetVisibility($target_fieldset, $logic_rules, $postData)
+                            )
+                            {
+                                $requiredFailed = true;
+                                $errorMsg = $field->getValidationAdvice() ? $field->getValidationAdvice() : Mage::helper('webforms')->__('%s is required', $field->getName());
+                                if (!in_array($errorMsg, $errors))
+                                    $errors[] = $errorMsg;
+                            }
+                        }
+                    }
+
+                    if ($dataMissing) {
+                        // check logic visibility
+                        $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
+                        $target_fieldset = array("id" => 'fieldset_' . $fieldset_id, 'logic_visibility' => $fieldset['logic_visibility']);
+
+                        if (
+                            $this->getLogicTargetVisibility($target_field, $logic_rules, $postData) &&
+                            $this->getLogicTargetVisibility($target_fieldset, $logic_rules, $postData)
+                        ) {
+                            $requiredFailed = true;
+                            $errorMsg = $field->getValidationAdvice() ? $field->getValidationAdvice() : Mage::helper('webforms')->__('%s is required', $field->getName());
+                            if (!in_array($errorMsg, $errors))
+                                $errors[] = $errorMsg;
+                        }
+                    }
+                }
+
+                // custom validation
+                if ($field->getIsActive() && $field->getValidateRegex() && $field->getRequired() && !$requiredFailed) {
                     // check logic visibility
                     $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
                     $target_fieldset = array("id" => 'fieldset_' . $fieldset_id, 'logic_visibility' => $fieldset['logic_visibility']);
@@ -620,63 +687,27 @@ class VladimirPopov_WebForms_Model_Webforms
                     }
                 }
 
-                $hint = htmlspecialchars(trim($field->getHint()));
-
-                if($field->getRequired() && !$postData && $field->getType() != 'file' && $field->getType() != 'image'){
-                    $errors[] = Mage::helper('webforms')->__('%s is required', $field->getName());
-                }
-
-                if ($field->getRequired() && is_array($postData)  && $field->getType() != 'file' && $field->getType() != 'image') {
-                    $dataMissing = true;
-
-                    foreach ($postData as $key => $value) {
-                        if (is_array($value)) {
-                            $value = implode("\n", $value);
-                        }
-                        $value = trim(strval($value));
-
-                        if($key == $field->getId()){
-                            $dataMissing = false;
-                        }
-                        if (
-                            $key == $field->getId()
-                            &&
-                            ($value == $hint || $value == '')
-                        ) {
-                            // check logic visibility
-                            $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
-                            $target_fieldset = array("id" => 'fieldset_' . $fieldset_id, 'logic_visibility' => $fieldset['logic_visibility']);
-
-                            if (
-                                $this->getLogicTargetVisibility($target_field, $logic_rules, $postData) &&
-                                $this->getLogicTargetVisibility($target_fieldset, $logic_rules, $postData)
-                            )
-                                $errors[] = Mage::helper('webforms')->__('%s is required', $field->getName());
-                        }
-                    }
-
-                    if($dataMissing){
-                        // check logic visibility
-                        $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
-                        $target_fieldset = array("id" => 'fieldset_' . $fieldset_id, 'logic_visibility' => $fieldset['logic_visibility']);
-
-                        if (
-                            $this->getLogicTargetVisibility($target_field, $logic_rules, $postData) &&
-                            $this->getLogicTargetVisibility($target_fieldset, $logic_rules, $postData)
-                        )
-                            $errors[] = Mage::helper('webforms')->__('%s is required', $field->getName());
-                    }
-                }
 
                 // check e-mail
                 if ($field->getIsActive() && $field->getType() == 'email') {
                     if (!empty($postData[$field->getId()])) {
                         $email_validate = new Zend_Validate_EmailAddress;
-                        if(!$email_validate->isValid($postData[$field->getId()])){
+                        if (!$email_validate->isValid($postData[$field->getId()])) {
                             $errors[] = Mage::helper('webforms')->__('Invalid e-mail address specified.');
                         }
-                        if (stristr(Mage::getStoreConfig('webforms/email/stoplist'), $postData[$field->getId()])) {
+                        if (Mage::helper('webforms')->isInEmailStoplist($postData[$field->getId()])) {
                             $errors[] = Mage::helper('webforms')->__('E-mail address is blocked: %s', $postData[$field->getId()]);
+                        }
+                    }
+                }
+
+                // validate unique
+                if ($field->getIsActive() && $field->getValidateUnique()) {
+                    if (!empty($postData[$field->getId()])) {
+                        $value = $postData[$field->getId()];
+                        $count = Mage::getModel('webforms/results')->getCollection()->addFieldFilter($field->getId(), $value, true)->getSize();
+                        if ($count) {
+                            $errors[] = $field->getValidateUniqueMessage() ? $field->getValidateUniqueMessage() : Mage::helper('webforms')->__('Duplicate value has been found: %s', $postData[$field->getId()]);
                         }
                     }
                 }
@@ -685,76 +716,12 @@ class VladimirPopov_WebForms_Model_Webforms
         // check files
         $files = $this->getUploadedFiles();
         foreach ($files as $field_name => $file) {
-            if (!empty($file['error']) && $file['error'] == UPLOAD_ERR_INI_SIZE) {
-                $errors[] = Mage::helper('webforms')->__('Uploaded file %s exceeds allowed limit: %s', $file['name'], ini_get('upload_max_filesize'));
-            }
-            if (isset($file['name']) && file_exists($file['tmp_name'])) {
-                $field_id = str_replace('file_', '', $field_name);
-                $postData['field'][$field_id] = Varien_File_Uploader::getCorrectFileName($file['name']);
-                $field = Mage::getModel('webforms/fields')
-                    ->setStoreId($this->getStoreId())
-                    ->load($field_id);
-                $filesize = round($file['size'] / 1024);
-                $images_upload_limit = Mage::getStoreConfig('webforms/images/upload_limit');
-                if ($this->getImagesUploadLimit() > 0) {
-                    $images_upload_limit = $this->getImagesUploadLimit();
-                }
-                $files_upload_limit = Mage::getStoreConfig('webforms/files/upload_limit');
-                if ($this->getFilesUploadLimit() > 0) {
-                    $files_upload_limit = $this->getFilesUploadLimit();
-                }
-                if ($field->getType() == 'image') {
-                    // check file size
-                    if ($filesize > $images_upload_limit && $images_upload_limit > 0) {
-                        $errors[] = Mage::helper('webforms')->__('Uploaded image %s (%s kB) exceeds allowed limit: %s kB', $file['name'], $filesize, $images_upload_limit);
-                    }
+            $field_id = str_replace('file_', '', $field_name);
 
-                    // check that file is valid image
-                    if (!@getimagesize($file['tmp_name'])) {
-                        $errors[] = Mage::helper('webforms')->__('Unsupported image compression: %s', $file['name']);
-                    }
-
-                } else {
-                    // check file size
-                    if ($filesize > $files_upload_limit && $files_upload_limit > 0) {
-                        $errors[] = Mage::helper('webforms')->__('Uploaded file %s (%s kB) exceeds allowed limit: %s kB', $file['name'], $filesize, $files_upload_limit);
-                    }
-
-
-                }
-                $allowed_extensions = $field->getAllowedExtensions();
-                // check for allowed extensions
-                if (count($allowed_extensions)) {
-                    preg_match('/\.([^\.]+)$/', $file['name'], $matches);
-                    $file_ext = strtolower($matches[1]);
-                    // check file extension
-                    if (!in_array($file_ext, $allowed_extensions)) {
-                        $errors[] = Mage::helper('webforms')->__('Uploaded file %s has none of allowed extensions: %s', $file['name'], implode(', ', $allowed_extensions));
-                    }
-                }
-
-                $restricted_extensions = $field->getRestrictedExtensions();
-                // check for restricted extensions
-                if (count($restricted_extensions)) {
-                    preg_match('/\.([^\.]+)$/', $file['name'], $matches);
-                    $file_ext = strtolower($matches[1]);
-                    if (in_array($file_ext, $restricted_extensions)) {
-                        $errors[] = Mage::helper('webforms')->__('Uploading of potentially dangerous files is not allowed.');
-                    }
-                    if (class_exists('finfo')) {
-                        $finfo = new finfo(FILEINFO_MIME_TYPE);
-                        $type = $finfo->file($file['tmp_name']);
-                        if (strstr($type, 'php') || strstr($type, 'python') || strstr($type, 'perl')) {
-                            $errors[] = Mage::helper('webforms')->__('Uploading of potentially dangerous files is not allowed.');
-                        }
-                    }
-                }
-
-                // check for valid filename
-                if (Mage::getStoreConfig('webforms/files/validate_filename') && !preg_match('/^[a-zA-Z0-9_\s-\.]+$/', $file['name'])) {
-                    $errors[] = Mage::helper('webforms')->__('Uploaded file %s has non-latin characters in the name', $file['name']);
-                }
-            }
+            $field = Mage::getModel('webforms/fields')
+                ->setStoreId($this->getStoreId())
+                ->load($field_id);
+            $errors = array_merge($errors, $field->validate($file));
         }
         $validate = new Varien_Object(array('errors' => $errors));
 
@@ -766,7 +733,8 @@ class VladimirPopov_WebForms_Model_Webforms
         return $validate->getData('errors');
     }
 
-    public function getPost($config){
+    public function getPost($config)
+    {
 
         $postData = Mage::app()->getRequest()->getPost();
         if (!empty($config['prefix'])) {
@@ -777,12 +745,12 @@ class VladimirPopov_WebForms_Model_Webforms
         // check visibility
         $fields_to_fieldsets = $this->getFieldsToFieldsets();
         $logic_rules = $this->getLogic(true);
-        foreach ($fields_to_fieldsets as $fieldset){
-            foreach($fieldset['fields'] as $field){
+        foreach ($fields_to_fieldsets as $fieldset) {
+            foreach ($fieldset['fields'] as $field) {
                 $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
                 $field_visibility = $this->getLogicTargetVisibility($target_field, $logic_rules, $postData['field']);
                 $field->setData('visible', $field_visibility);
-                if(!$field_visibility){
+                if (!$field_visibility) {
                     $postData['field'][$field->getId()] = '';
                 }
             }
@@ -843,14 +811,14 @@ class VladimirPopov_WebForms_Model_Webforms
             foreach ($this->_getFieldsToFieldsets() as $fieldset) {
                 foreach ($fieldset['fields'] as $field) {
                     if ($field->getType() == 'file' || $field->getType() == 'image') {
-                        if (!empty($postData['delete_file_' . $field->getId()])) {
-                            $resultFiles = Mage::getModel('webforms/files')->getCollection()
-                                ->addFilter('result_id', $result->getId())
-                                ->addFilter('field_id', $field->getId());
-                            foreach ($resultFiles as $resultFile) {
-                                $resultFile->delete();
+                        if (!empty($postData['delete_file_' . $field->getId()]) && is_array($postData['delete_file_' . $field->getId()])) {
+                            foreach ($postData['delete_file_' . $field->getId()] as $link_hash) {
+                                $resultFiles = Mage::getModel('webforms/files')->getCollection()
+                                    ->addFilter('link_hash', $link_hash);
+                                foreach ($resultFiles as $resultFile) {
+                                    $resultFile->delete();
+                                }
                             }
-                            $postData['field'][$field->getId()] = '';
                         }
                     }
                 }
@@ -933,6 +901,8 @@ class VladimirPopov_WebForms_Model_Webforms
 
             }
             $result->resizeImages();
+
+            Mage::getModel('webforms/dropzone')->cleanup();
 
             return $result;
         } catch (Exception $e) {
@@ -1182,7 +1152,7 @@ class VladimirPopov_WebForms_Model_Webforms
                     $storeId = Mage::getModel('core/store')->load($storeCode, 'code')->getId();
                     if (!$storeId) {
                         $text = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
-                        if(!in_array($text, $warnings))
+                        if (!in_array($text, $warnings))
                             $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
                     }
                 }
@@ -1204,8 +1174,9 @@ class VladimirPopov_WebForms_Model_Webforms
                                 $storeId = Mage::getModel('core/store')->load($storeCode, 'code')->getId();
                                 if (!$storeId) {
                                     $text = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
-                                    if(!in_array($text, $warnings))
-                                        $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);                                }
+                                    if (!in_array($text, $warnings))
+                                        $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
+                                }
                             }
                         }
                     }
@@ -1215,8 +1186,9 @@ class VladimirPopov_WebForms_Model_Webforms
                         $storeId = Mage::getModel('core/store')->load($storeCode, 'code')->getId();
                         if (!$storeId) {
                             $text = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
-                            if(!in_array($text, $warnings))
-                                $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);                        }
+                            if (!in_array($text, $warnings))
+                                $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
+                        }
                     }
                 }
             }
@@ -1227,8 +1199,9 @@ class VladimirPopov_WebForms_Model_Webforms
                 $storeId = Mage::getModel('core/store')->load($storeCode, 'code')->getId();
                 if (!$storeId) {
                     $text = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
-                    if(!in_array($text, $warnings))
-                        $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);                }
+                    if (!in_array($text, $warnings))
+                        $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
+                }
             }
         }
 
@@ -1248,8 +1221,9 @@ class VladimirPopov_WebForms_Model_Webforms
                         $storeId = Mage::getModel('core/store')->load($storeCode, 'code')->getId();
                         if (!$storeId) {
                             $text = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
-                            if(!in_array($text, $warnings))
-                                $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);                        }
+                            if (!in_array($text, $warnings))
+                                $warnings[] = Mage::helper('webforms')->__('Store view contained within data not found: %s', $storeCode);
+                        }
                     }
                 }
             }
@@ -1362,7 +1336,7 @@ class VladimirPopov_WebForms_Model_Webforms
                     foreach ($logicData['target'] as $targetData) {
                         $prefix = 'field_';
                         if (strstr($targetData, 'fieldset_')) $prefix = 'fieldset_';
-                        if(!empty($logicMatrix[$targetData])) $target[] = $prefix . $logicMatrix[$targetData];
+                        if (!empty($logicMatrix[$targetData])) $target[] = $prefix . $logicMatrix[$targetData];
                     }
 
                     $logicModel->setData('target', $target);
@@ -1380,7 +1354,7 @@ class VladimirPopov_WebForms_Model_Webforms
                                 foreach ($storeData['target'] as $targetData) {
                                     $prefix = 'field_';
                                     if (strstr($targetData, 'fieldset_')) $prefix = 'fieldset_';
-                                    if(!empty($logicMatrix[$targetData])) $target[] = $prefix . $logicMatrix[$targetData];
+                                    if (!empty($logicMatrix[$targetData])) $target[] = $prefix . $logicMatrix[$targetData];
                                 }
                                 $storeData['target'] = $target;
                                 $logicModel->saveStoreData($storeId, $storeData);

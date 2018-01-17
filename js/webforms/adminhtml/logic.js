@@ -130,6 +130,8 @@ function Admin_JSWebFormsLogic(targets, logicRules, prefix) {
             if (typeof(input[0]) != 'object') {
                 input = $$('[name="' + prefix + '[field][' + config['field_id'] + '][]"]');
                 trigger_function = 'onclick';
+                if( input[0].type == 'select-multiple')
+                    trigger_function = 'onchange';
             }
             for (var i in input) {
                 if (trigger_function == 'onchange')

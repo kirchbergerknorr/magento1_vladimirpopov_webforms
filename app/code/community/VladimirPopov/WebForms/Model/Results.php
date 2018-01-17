@@ -136,12 +136,16 @@ class VladimirPopov_WebForms_Model_Results
         $store_group = Mage::app()->getStore($this->getStoreId())->getFrontendName();
         $store_name = Mage::app()->getStore($this->getStoreId())->getName();
 
+        $customer_email = $this->getCustomerEmail();
+        if (isset($customer_email[0])) $customer_email = $customer_email[0];
+
         $vars = Array(
             'webform_subject' => $subject,
             'webform_name' => $webform->getName(),
             'webform_result' => $this->toHtml($recipient),
             'customer_name' => $this->getCustomerName(),
-            'customer_email' => $this->getCustomerEmail(),
+            'customer_email' => $customer_email,
+            'sender_email' => $email,
             'ip' => $this->getIp(),
             'store_group' => $store_group,
             'store_name' => $store_name,
@@ -342,11 +346,15 @@ class VladimirPopov_WebForms_Model_Results
         $store_group = Mage::app()->getStore($this->getStoreId())->getFrontendName();
         $store_name = Mage::app()->getStore($this->getStoreId())->getName();
 
+        $customer_email = $this->getCustomerEmail();
+        if (isset($customer_email[0])) $customer_email = $customer_email[0];
+
         $vars = Array(
             'webform_name' => $webform->getName(),
             'webform_result' => $this->toHtml('customer'),
             'customer_name' => $this->getCustomerName(),
-            'customer_email' => $this->getCustomerEmail(),
+            'customer_email' => $customer_email,
+            'sender_email', $email,
             'status' => $this->getStatusName(),
             'ip' => $this->getIp(),
             'store_group' => $store_group,
@@ -465,12 +473,15 @@ class VladimirPopov_WebForms_Model_Results
         $store_group = Mage::app()->getStore($this->getStoreId())->getFrontendName();
         $store_name = Mage::app()->getStore($this->getStoreId())->getName();
 
+        $customer_email = $this->getCustomerEmail();
+        if (isset($customer_email[0])) $customer_email = $customer_email[0];
+
         $vars = Array(
             'webform_name' => $webform->getName(),
             'webform_result' => $this->toHtml(),
             'result' => $varResult,
             'customer_name' => $this->getCustomerName(),
-            'customer_email' => $this->getCustomerEmail(),
+            'customer_email' => $customer_email,
             'ip' => $this->getIp(),
             'store_group' => $store_group,
             'store_name' => $store_name,
@@ -542,7 +553,8 @@ class VladimirPopov_WebForms_Model_Results
         return $files;
     }
 
-    public function getFile($code = false){
+    public function getFile($code = false)
+    {
         if ($code === false) return false;
         foreach ($this->getWebform()->getFieldsToFieldsets(true) as $fieldset_id => $fieldset) {
             foreach ($fieldset["fields"] as $field) {
@@ -582,7 +594,7 @@ class VladimirPopov_WebForms_Model_Results
 
                 $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
 
-                if($field->hasData('visible'))
+                if ($field->hasData('visible'))
                     $field_visibility = $field->getData('visible');
                 else
                     $field_visibility = $webform->getLogicTargetVisibility($target_field, $logic_rules, $this->getData('field'));
@@ -688,21 +700,29 @@ class VladimirPopov_WebForms_Model_Results
                             $data_value = $field->formatDate($value);
                             break;
                         case 'image':
-                            $data_value = '';
+                            $fileList = array();
                             $files = Mage::getModel('webforms/files')->getCollection()->addFilter('result_id', $this->getId())->addFilter('field_id', $field->getId());
                             /** @var VladimirPopov_WebForms_Model_Files $file */
                             foreach ($files as $file) {
-                                $img = '<img src="' . $file->getThumbnail(Mage::getStoreConfig('webforms/images/email_thumbnail_width'), Mage::getStoreConfig('webforms/images/email_thumbnail_height')) . '"/>';
-                                $data_value .= $img;
+                                $htmlContent = '';
+                                $img = '<figure><img src="' . $file->getThumbnail(Mage::getStoreConfig('webforms/images/email_thumbnail_width'), Mage::getStoreConfig('webforms/images/email_thumbnail_height')) . '"/>';
+                                $htmlContent .= $img;
+                                $htmlContent .= '<figcaption>' . $file->getName();
+                                $htmlContent .= ' <small>[' . $file->getSizeText() . ']</small></figcaption>';
+                                $htmlContent .= '</figure>';
+                                $fileList[]= $htmlContent;
                             }
+                            $data_value = implode('<br>', $fileList);
                             break;
                         case 'file':
-                            $data_value = '';
+                            $fileList = array();
                             $files = Mage::getModel('webforms/files')->getCollection()->addFilter('result_id', $this->getId())->addFilter('field_id', $field->getId());
                             foreach ($files as $file) {
-                                $data_value .= $file->getName();
-                                $data_value .= ' <small>[' . $file->getSizeText() . ']</small>';
+                                $htmlContent = $file->getName();
+                                $htmlContent .= ' <small>[' . $file->getSizeText() . ']</small>';
+                                $fileList[] = $htmlContent;
                             }
+                            $data_value = implode('<br>', $fileList);
                             break;
                         case 'stars':
                             $data_value = $value . ' / ' . $field->getStarsCount();
@@ -822,6 +842,14 @@ class VladimirPopov_WebForms_Model_Results
             $options['skip_fields'] = array();
         }
 
+        if (!isset($options['adminhtml_downloads'])) {
+            $options['adminhtml_downloads'] = false;
+        }
+
+        if (!isset($options['explicit_links'])) {
+            $options['explicit_links'] = false;
+        }
+
         $html = "";
         $store_group = Mage::app()->getStore($this->getStoreId())->getFrontendName();
         $store_name = Mage::app()->getStore($this->getStoreId())->getName();
@@ -846,32 +874,28 @@ class VladimirPopov_WebForms_Model_Results
         $fields_to_fieldsets = $webform
             ->getFieldsToFieldsets(true);
         foreach ($fields_to_fieldsets as $fieldset_id => $fieldset) {
-
             $k = false;
             $field_html = "";
 
             $target_fieldset = array("id" => 'fieldset_' . $fieldset_id, 'logic_visibility' => $fieldset['logic_visibility']);
             $fieldset_visibility = $webform->getLogicTargetVisibility($target_fieldset, $logic_rules, $this->getData('field'));
-
             if ($fieldset_visibility) {
                 /** @var VladimirPopov_WebForms_Model_Fields $field */
                 foreach ($fieldset['fields'] as $field) {
                     $target_field = array("id" => 'field_' . $field->getId(), 'logic_visibility' => $field->getData('logic_visibility'));
-                    if($field->hasData('visible')){
+                    if ($field->hasData('visible')) {
                         $field_visibility = $field->getData('visible');
                     } else
                         $field_visibility = $webform->getLogicTargetVisibility($target_field, $logic_rules, $this->getData('field'));
                     $value = $this->getData('field_' . $field->getId());
                     if ($field->getType() == 'html')
                         $value = $field->getValue();
-                    if (is_string($value)) $value = trim($value);
                     if ($value && $field_visibility) {
                         if (!in_array($field->getType(), $options['skip_fields']) && $field->getResultDisplay() != 'off') {
                             $field_name = $field->getName();
                             if (strlen(trim($field->getResultLabel())) > 0)
                                 $field_name = $field->getResultLabel();
                             if ($field->getResultDisplay() != 'value') $field_html .= '<b>' . $field_name . '</b><br>';
-                            $filename = $value;
                             switch ($field->getType()) {
                                 case 'date':
                                 case 'datetime':
@@ -882,26 +906,37 @@ class VladimirPopov_WebForms_Model_Results
                                     $value = $value . ' / ' . $field->getStarsCount();
                                     break;
                                 case 'file':
-                                    $value = '';
+                                    $fileList = array();
                                     $files = Mage::getModel('webforms/files')->getCollection()->addFilter('result_id', $this->getId())->addFilter('field_id', $field->getId());
                                     foreach ($files as $file) {
-                                        if ($recipient == 'admin') $value .= '<a href="' . $file->getDownloadLink() . '">' . $file->getName() . '</a>';
-                                        else $value .= $file->getName();
-                                        $value .= ' <small>[' . $file->getSizeText() . ']</small>';
+                                        $htmlContent = '';
+                                        if ($recipient == 'admin'  && ($webform->getFrontendDownload() || $options['explicit_links'])) $htmlContent .= '<a href="' . $file->getDownloadLink($options['adminhtml_downloads']) . '">' . $file->getName() . '</a>';
+                                        else $htmlContent .= $file->getName();
+                                        $htmlContent .= ' <small>[' . $file->getSizeText() . ']</small>';
+                                        $fileList[] = $htmlContent;
                                     }
+                                    $value = implode('<br>', $fileList);
                                     break;
                                 case 'image':
-                                    $value = '';
+                                    $fileList = array();
                                     $files = Mage::getModel('webforms/files')->getCollection()->addFilter('result_id', $this->getId())->addFilter('field_id', $field->getId());
                                     /** @var VladimirPopov_WebForms_Model_Files $file */
                                     foreach ($files as $file) {
-                                        $img = '<img src="' . $file->getThumbnail(Mage::getStoreConfig('webforms/images/email_thumbnail_width'), Mage::getStoreConfig('webforms/images/email_thumbnail_height')) . '"/>';
-                                        $value .= $img;
-                                        if ($recipient == 'admin') {
-                                            $value .= '<br><a href="' . $file->getDownloadLink() . '">' . $file->getName() . '</a>';
-                                            $value .= ' <small>[' . $file->getSizeText() . ']</small>';
+                                        $htmlContent = '';
+                                        $img = '<figure><img src="' . $file->getThumbnail(Mage::getStoreConfig('webforms/images/email_thumbnail_width'), Mage::getStoreConfig('webforms/images/email_thumbnail_height')) . '"/>';
+                                        $htmlContent .= $img;
+                                        if ($recipient == 'admin'  && ($webform->getFrontendDownload() || $options['explicit_links'])) {
+                                            $htmlContent .= '<figcaption><a href="' . $file->getDownloadLink($options['adminhtml_downloads']) . '">' . $file->getName() . '</a>';
+                                            $htmlContent .= ' <small>[' . $file->getSizeText() . ']</small></figcaption>';
+                                        } else {
+                                                $htmlContent .= '<figcaption>' . $file->getName();
+                                                $htmlContent .= ' <small>[' . $file->getSizeText() . ']</small></figcaption>';
                                         }
+                                        $htmlContent .= '</figure>';
+                                        $fileList[]= $htmlContent;
                                     }
+                                    $value = implode('<br>', $fileList);
+
                                     break;
                                 case 'select/contact':
                                     $contact = $field->getContactArray($value);
@@ -977,24 +1012,25 @@ class VladimirPopov_WebForms_Model_Results
 
     public function setWebform(VladimirPopov_WebForms_Model_Webforms $webform)
     {
-        if($webform->getId() == $this->getWebformId())
+        if ($webform->getId() == $this->getWebformId())
             $this->_webform = $webform;
         return $this;
     }
 
-    public function getValue($fieldCode = false)
+    public function getValue($code = false)
     {
-        if ($fieldCode === false) return false;
-        foreach ($this->getWebform()->getFieldsToFieldsets(true) as $fieldset_id => $fieldset) {
-            foreach ($fieldset["fields"] as $field) {
-                if ($field->getCode() == $fieldCode) {
-                    return $this->getData('field_' . $field->getId());
-                }
+        if ($code === false) return false;
+        $fieldCollection = Mage::getModel('webforms/fields')->getCollection()->addFilter('webform_id', $this->getWebformId());
+        foreach ($fieldCollection as $field) {
+            if ($field->getCode() == $code) {
+                if($this->getData('field_' . $field->getId())) return $this->getData('field_' . $field->getId());
             }
         }
+        return false;
     }
 
-    public function setValue($fieldCode, $value){
+    public function setValue($fieldCode, $value)
+    {
         foreach ($this->getWebform()->getFieldsToFieldsets(true) as $fieldset_id => $fieldset) {
             foreach ($fieldset["fields"] as $field) {
                 if ($field->getCode() == $fieldCode) {

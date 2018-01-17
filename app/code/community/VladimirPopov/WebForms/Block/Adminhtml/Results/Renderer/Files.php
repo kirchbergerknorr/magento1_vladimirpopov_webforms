@@ -15,25 +15,33 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Renderer_Files
             ->addFilter('field_id', $field_id);
 
         $html = '';
+
         /** @var VladimirPopov_WebForms_Model_Files $file */
         foreach ($files as $file) {
-            if(file_exists($file->getFullPath())) {
+            $nameStart = '<div class="webforms-file-link-name">' . substr($file->getName(), 0, strlen($file->getName()) - 7) . '</div>';
+            $nameEnd = '<div class="webforms-file-link-name-end">' . substr($file->getName(), -7) . '</div>';
+            if (file_exists($file->getFullPath())) {
                 if ($field->getType() == 'file') {
-                    $html .= '<nobr><a href="' . $file->getDownloadLink() . '">' . $file->getName() . '</a> <small>['.$file->getSizeText().']</small></nobr>' .
-                        '<br><small>' . $this->__('Type') . ': ' . $file->getMimeType() . '</small>';
-
+                    $html .= '<nobr><a class="grid-button-action webforms-file-link" href="' . $file->getDownloadLink(true) . '">' . $nameStart . $nameEnd . ' <small>[' . $file->getSizeText() . ']</small></a></nobr>';
                 }
                 if ($field->getType() == 'image') {
                     $width = Mage::getStoreConfig('webforms/images/grid_thumbnail_width');
                     $height = Mage::getStoreConfig('webforms/images/grid_thumbnail_height');
-                    if ($file->getThumbnail($width, $height))
-                        $html .= '<a href="' . $file->getDownloadLink() . '"><img src="' . $file->getThumbnail($width, $height) . '"/></a><br>';
-                    $html .= '<nobr><a href="' . $file->getDownloadLink() . '">' . $file->getName() . '</a> <small>[' . $file->getSizeText() . ']</small></nobr>';
+                    if ($file->getThumbnail($width, $height)) {
+
+                        $html .= '<a class="grid-button-action webforms-file-link" href="' . $file->getDownloadLink() . '">
+                            <figure>
+                                <p><img src="' . $file->getThumbnail($width, $height) . '"/></p>
+                                <figcaption>' . $file->getName() . ' <small>[' . $file->getSizeText() . ']</small></figcaption>
+                            </figure>
+                        </a>';
+                    } else {
+                        $html .= '<nobr><a class="grid-button-action webforms-file-link" href="' . $file->getDownloadLink(true) . '">' . $nameStart . $nameEnd . ' <small>[' . $file->getSizeText() . ']</small></a></nobr>';
+                    }
                 }
-            }
-            else {
-                $html .= '<nobr>'. $file->getName() . ' <small>['.$file->getSizeText().']</small></nobr>' .
-                         '<br><small>' . $this->__('Type') . ': ' . $file->getMimeType() . '</small>';
+            } else {
+                $html .= '<nobr><a class="grid-button-action webforms-file-link" href="javascript:alert(\'' . Mage::helper('webforms')->__('File not found.') . '\')">' . $nameStart . $nameEnd . ' <small>[' . $file->getSizeText() . ']</small></a></nobr>';
+
             }
         }
 

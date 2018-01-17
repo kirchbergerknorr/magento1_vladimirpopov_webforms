@@ -7,11 +7,12 @@
 class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
     extends Mage_Adminhtml_Block_Widget_Form
 {
-    protected function _prepareLayout(){
-        
+    protected function _prepareLayout()
+    {
+
         parent::_prepareLayout();
-    }   
-    
+    }
+
     protected function _prepareForm()
     {
         $model = Mage::getModel('webforms/fields');
@@ -22,12 +23,12 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
         $form->setDataObject(Mage::registry('field'));
 
         $this->setForm($form);
-        
-        $fieldset = $form->addFieldset('webforms_form',array(
+
+        $fieldset = $form->addFieldset('webforms_form', array(
             'legend' => Mage::helper('webforms')->__('Information')
         ));
-        
-        $fieldset->addField('name','text',array(
+
+        $fieldset->addField('name', 'text', array(
             'label' => Mage::helper('webforms')->__('Name'),
             'class' => 'required-entry',
             'required' => true,
@@ -35,55 +36,55 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
         ));
 
         $type = $fieldset->addField('type', 'select', array(
-            'label'     => Mage::helper('webforms')->__('Type'),
-            'title'     => Mage::helper('webforms')->__('Type'),
-            'name'      => 'type',
-            'required'  => false,
-            'options'   => $model->getFieldTypes(),
+            'label' => Mage::helper('webforms')->__('Type'),
+            'title' => Mage::helper('webforms')->__('Type'),
+            'name' => 'type',
+            'required' => false,
+            'options' => $model->getFieldTypes(),
         ));
 
-        $fieldset->addField('code','text',array(
+        $fieldset->addField('code', 'text', array(
             'label' => Mage::helper('webforms')->__('Code'),
             'name' => 'code',
             'note' => Mage::helper('webforms')->__('Code is used to help identify this field in scripts'),
         ));
 
-        $result_label = $fieldset->addField('result_label','text',array(
+        $result_label = $fieldset->addField('result_label', 'text', array(
             'label' => Mage::helper('webforms')->__('Result label'),
             'required' => false,
             'name' => 'result_label',
             'note' => Mage::helper('webforms')->__('Result label will be used on results page. Use it to shorten long question fields')
         ));
 
-        $hint = $fieldset->addField('hint','text',array(
+        $hint = $fieldset->addField('hint', 'text', array(
             'label' => Mage::helper('webforms')->__('Hint'),
             'required' => false,
             'name' => 'hint',
             'note' => Mage::helper('webforms')->__('Hint message will appear in the input and disappear on the focus'),
         ));
 
-        $hint_email = $fieldset->addField('hint_email','text',array(
+        $hint_email = $fieldset->addField('hint_email', 'text', array(
             'label' => Mage::helper('webforms')->__('Hint'),
             'required' => false,
             'name' => 'hint_email',
             'note' => Mage::helper('webforms')->__('Hint message will appear in the input and disappear on the focus'),
         ));
 
-        $hint_url = $fieldset->addField('hint_url','text',array(
+        $hint_url = $fieldset->addField('hint_url', 'text', array(
             'label' => Mage::helper('webforms')->__('Hint'),
             'required' => false,
             'name' => 'hint_url',
             'note' => Mage::helper('webforms')->__('Hint message will appear in the input and disappear on the focus'),
         ));
 
-        $hint_textarea = $fieldset->addField('hint_textarea','text',array(
+        $hint_textarea = $fieldset->addField('hint_textarea', 'text', array(
             'label' => Mage::helper('webforms')->__('Hint'),
             'required' => false,
             'name' => 'hint_textarea',
             'note' => Mage::helper('webforms')->__('Hint message will appear in the input and disappear on the focus'),
         ));
 
-        $comment = $fieldset->addField('comment','textarea',array(
+        $comment = $fieldset->addField('comment', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Comment'),
             'required' => false,
             'name' => 'comment',
@@ -92,118 +93,178 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
             'wysiwyg' => true,
         ));
 
-        $fieldsetsOptions  = Mage::registry('webforms_data')->getFieldsetsOptionsArray();
-        if(count($fieldsetsOptions)>1){
+        $fieldsetsOptions = Mage::registry('webforms_data')->getFieldsetsOptionsArray();
+        if (count($fieldsetsOptions) > 1) {
             $fieldset->addField('fieldset_id', 'select', array(
-                'label'     => Mage::helper('webforms')->__('Field set'),
-                'title'     => Mage::helper('webforms')->__('Field set'),
-                'name'      => 'fieldset_id',
-                'required'  => false,
-                'options'   => $fieldsetsOptions,
+                'label' => Mage::helper('webforms')->__('Field set'),
+                'title' => Mage::helper('webforms')->__('Field set'),
+                'name' => 'fieldset_id',
+                'required' => false,
+                'options' => $fieldsetsOptions,
             ));
         }
 
-        $autocomplete_choices = $fieldset->addField('value_autocomplete_choices','textarea',array(
+        $dob_customer = $fieldset->addField('value_dob_customer', 'select', array(
+            'label' => Mage::helper('webforms')->__('Pre-fill with customer data'),
+            'required' => false,
+            'name' => 'value[dob_customer]',
+            'note' => Mage::helper('webforms')->__('Use customer date of birth account data to pre-fill the field'),
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray()
+        ));
+
+        $autocomplete_choices = $fieldset->addField('value_autocomplete_choices', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Auto-complete choices'),
             'required' => false,
             'name' => 'value[autocomplete_choices]',
             'note' => Mage::helper('webforms')->__('Drop-down list of auto-complete choices. Values should be separated with new line'),
         ));
 
-        $options = $fieldset->addField('value_options','textarea',array(
+        $multiselect = $fieldset->addField('value_multiselect', 'select', array(
+            'label' => Mage::helper('webforms')->__('Multiple selection'),
+            'required' => false,
+            'name' => 'value[multiselect]',
+            'note' => Mage::helper('webforms')->__('Select multiple values'),
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray()
+        ));
+
+        $dropzone = $fieldset->addField('value_dropzone', 'select', array(
+            'label' => Mage::helper('webforms')->__('Enable dropzone'),
+            'required' => false,
+            'name' => 'value[dropzone]',
+            'note' => Mage::helper('webforms')->__('Dropzone allows you to upload multiple files at once and also adds drag and drop functionality'),
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray()
+        ));
+
+        $dropzone_text = $fieldset->addField('value_dropzone_text', 'text', array(
+            'label' => Mage::helper('webforms')->__('Dropzone text'),
+            'name' => 'value[dropzone_text]',
+            'note' => Mage::helper('webforms')->__('Set custom text in the dropzone')
+        ));
+
+        $dropzone_maxfiles = $fieldset->addField('value_dropzone_maxfiles', 'text', array(
+            'label' => Mage::helper('webforms')->__('Maximum files in dropzone'),
+            'required' => false,
+            'name' => 'value[dropzone_maxfiles]',
+            'class' => 'validate-number',
+            'note' => Mage::helper('webforms')->__('Set maximum number of files to be uploaded through dropzone. Default value is 5')
+        ));
+
+        $dropzone_image = $fieldset->addField('value_dropzone_image', 'select', array(
+            'label' => Mage::helper('webforms')->__('Enable dropzone'),
+            'required' => false,
+            'name' => 'value[dropzone_image]',
+            'note' => Mage::helper('webforms')->__('Dropzone allows you to upload multiple files at once and also adds drag and drop functionality'),
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray()
+        ));
+
+        $dropzone_image_text = $fieldset->addField('value_dropzone_text_image', 'text', array(
+            'label' => Mage::helper('webforms')->__('Dropzone text'),
+            'name' => 'value[dropzone_text_image]',
+            'note' => Mage::helper('webforms')->__('Set custom text in the dropzone')
+        ));
+
+        $dropzone_image_maxfiles = $fieldset->addField('value_dropzone_maxfiles_image', 'text', array(
+            'label' => Mage::helper('webforms')->__('Maximum files in dropzone'),
+            'required' => false,
+            'name' => 'value[dropzone_maxfiles_image]',
+            'class' => 'validate-number',
+            'note' => Mage::helper('webforms')->__('Set maximum number of files to be uploaded through dropzone. Default value is 5')
+        ));
+
+        $options = $fieldset->addField('value_options', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Options'),
             'required' => false,
             'name' => 'value[options]',
             'note' => Mage::helper('webforms')->__('Select values should be separated with new line<br>Use <i>^Option Text</i> to check default<br>Use <i>Option Text {{null}}</i> to create option without value</i><br>Use <i>Option Text {{val VALUE}}</i> to set different option value<br>Use <i>Option Text {{disabled}}</i> to create disabled option'),
         ));
 
-        $options_radio = $fieldset->addField('value_options_radio','textarea',array(
+        $options_radio = $fieldset->addField('value_options_radio', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Options'),
             'required' => false,
             'name' => 'value[options_radio]',
             'note' => Mage::helper('webforms')->__('Select values should be separated with new line<br>Use <i>^Option Text</i> to check default<br>Use <i>Option Text {{null}}</i> to create option without value</i><br>Use <i>Option Text {{val VALUE}}</i> to set different option value'),
         ));
 
-        $options_checkbox = $fieldset->addField('value_options_checkbox','textarea',array(
+        $options_checkbox = $fieldset->addField('value_options_checkbox', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Options'),
             'required' => false,
             'name' => 'value[options_checkbox]',
             'note' => Mage::helper('webforms')->__('Select values should be separated with new line<br>Use <i>^Option Text</i> to check default<br>Use <i>Option Text {{null}}</i> to create option without value</i><br>Use <i>Option Text {{val VALUE}}</i> to set different option value'),
         ));
 
-        $options_contact = $fieldset->addField('value_options_contact','textarea',array(
+        $options_contact = $fieldset->addField('value_options_contact', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Options'),
             'required' => false,
             'name' => 'value[options_contact]',
             'note' => Mage::helper('webforms')->__('Select values should be separated with new line<br>Use <i>^Option Text</i> to check default<br>Options format:<br><i>Site Admin &lt;admin@mysite.com&gt;<br>Sales &lt;sales@mysite.com&gt;</i>'),
         ));
 
-        $text_value = $fieldset->addField('value_text','text',array(
+        $text_value = $fieldset->addField('value_text', 'text', array(
             'label' => Mage::helper('webforms')->__('Field value'),
             'name' => 'value[text]',
             'note' => Mage::helper('webforms')->__('Following codes pre-fill data for registered customer:<br>{{email}} - customer e-mail address<br>{{firstname}} - first name of the customer<br>{{lastname}} - last name of the customer<br>{{company}} - billing profile company<br>{{city}} - billing profile city<br>{{street}} - billing profile street<br>{{country_id}} - billing profile country 2 symbol code<br>{{region}} - billing profile region<br>{{postcode}} - billing profile postcode<br>{{telephone}} - billing profile telephone<br>{{fax}} - billing profile fax')
         ));
 
-        $text_value_email = $fieldset->addField('value_text_email','text',array(
+        $text_value_email = $fieldset->addField('value_text_email', 'text', array(
             'label' => Mage::helper('webforms')->__('Field value'),
             'name' => 'value[text_email]',
             'note' => Mage::helper('webforms')->__('Following codes pre-fill data for registered customer:<br>{{email}} - customer e-mail address<br>{{firstname}} - first name of the customer<br>{{lastname}} - last name of the customer<br>{{company}} - billing profile company<br>{{city}} - billing profile city<br>{{street}} - billing profile street<br>{{country_id}} - billing profile country 2 symbol code<br>{{region}} - billing profile region<br>{{postcode}} - billing profile postcode<br>{{telephone}} - billing profile telephone<br>{{fax}} - billing profile fax')
         ));
 
-        $assign_customer_id_by_email = $fieldset->addField('value_assign_customer_id_by_email','select',array(
+        $assign_customer_id_by_email = $fieldset->addField('value_assign_customer_id_by_email', 'select', array(
             'label' => Mage::helper('webforms')->__('Assign Customer ID automatically'),
             'name' => 'value[assign_customer_id_by_email]',
             'note' => Mage::helper('webforms')->__('Assign Customer ID automatically if e-mail address matches customer account in the database'),
-            'values'   => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ));
 
-        $text_value_url = $fieldset->addField('value_text_url','text',array(
+        $text_value_url = $fieldset->addField('value_text_url', 'text', array(
             'label' => Mage::helper('webforms')->__('Field value'),
             'name' => 'value[text_url]',
             'note' => Mage::helper('webforms')->__('Following codes pre-fill data for registered customer:<br>{{email}} - customer e-mail address<br>{{firstname}} - first name of the customer<br>{{lastname}} - last name of the customer<br>{{company}} - billing profile company<br>{{city}} - billing profile city<br>{{street}} - billing profile street<br>{{country_id}} - billing profile country 2 symbol code<br>{{region}} - billing profile region<br>{{postcode}} - billing profile postcode<br>{{telephone}} - billing profile telephone<br>{{fax}} - billing profile fax')
         ));
 
-        $textarea_value = $fieldset->addField('value_textarea','textarea',array(
+        $textarea_value = $fieldset->addField('value_textarea', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Field value'),
             'name' => 'value[textarea]',
             'note' => Mage::helper('webforms')->__('Following codes pre-fill data for registered customer:<br>{{email}} - customer e-mail address<br>{{firstname}} - first name of the customer<br>{{lastname}} - last name of the customer<br>{{company}} - billing profile company<br>{{city}} - billing profile city<br>{{street}} - billing profile street<br>{{country_id}} - billing profile country 2 symbol code<br>{{region}} - billing profile region<br>{{postcode}} - billing profile postcode<br>{{telephone}} - billing profile telephone<br>{{fax}} - billing profile fax')
         ));
 
-        $number_min = $fieldset->addField('value_number_min','text',array(
+        $number_min = $fieldset->addField('value_number_min', 'text', array(
             'label' => Mage::helper('webforms')->__('Minimum value'),
             'name' => 'value[number_min]',
             'note' => Mage::helper('webforms')->__('Minimum integer value that can be entered'),
             'class' => 'validate-number'
         ));
 
-        $number_max = $fieldset->addField('value_number_max','text',array(
+        $number_max = $fieldset->addField('value_number_max', 'text', array(
             'label' => Mage::helper('webforms')->__('Maximum value'),
             'name' => 'value[number_max]',
             'note' => Mage::helper('webforms')->__('Maximum integer value that can be entered'),
             'class' => 'validate-number'
         ));
 
-        $stars_init = $fieldset->addField('value_stars_init','text',array(
+        $stars_init = $fieldset->addField('value_stars_init', 'text', array(
             'label' => Mage::helper('webforms')->__('Number of stars selected by default'),
             'note' => Mage::helper('webforms')->__('3 stars are selected by default'),
             'name' => 'value[stars_init]',
             'class' => 'validate-number'
         ));
 
-        $stars_max = $fieldset->addField('value_stars_max','text',array(
+        $stars_max = $fieldset->addField('value_stars_max', 'text', array(
             'label' => Mage::helper('webforms')->__('Total amount of stars'),
             'name' => 'value[stars_max]',
             'note' => Mage::helper('webforms')->__('5 stars are available by default'),
             'class' => 'validate-number'
         ));
 
-        $newsletter_label = $fieldset->addField('value_newsletter_label','text',array(
+        $newsletter_label = $fieldset->addField('value_newsletter_label', 'text', array(
             'label' => Mage::helper('webforms')->__('Newsletter subscription checkbox label'),
             'name' => 'value[newsletter_label]',
             'note' => Mage::helper('webforms')->__('Overwrite default text &quot;Sign Up for Newsletter&quot;<br>Use <i>^Sign Up for Newsletter</i> to check by default'),
         ));
 
-        $allowed_extensions = $fieldset->addField('value_allowed_extensions','textarea',array(
+        $allowed_extensions = $fieldset->addField('value_allowed_extensions', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Allowed file extensions'),
             'name' => 'value[allowed_extensions]',
             'note' => Mage::helper('webforms')->__('Specify allowed file extensions separated by newline. Example:<br><i>doc<br>txt<br>pdf</i>')
@@ -211,7 +272,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
 
         $editor_type = 'textarea';
         $config = '';
-        if ((float) substr(Mage::getVersion(), 0, 3) > 1.3 && substr(Mage::getVersion(), 0, 5) != '1.4.0' || Mage::helper('webforms')->getMageEdition() == 'EE') {
+        if ((float)substr(Mage::getVersion(), 0, 3) > 1.3 && substr(Mage::getVersion(), 0, 5) != '1.4.0' || Mage::helper('webforms')->getMageEdition() == 'EE') {
 
 
             $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig(
@@ -239,61 +300,61 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
             $config = $wysiwygConfig;
         }
 
-        $html_content = $fieldset->addField('value_html',$editor_type,array(
+        $html_content = $fieldset->addField('value_html', $editor_type, array(
             'label' => Mage::helper('webforms')->__('HTML content'),
             'name' => 'value[html]',
             'config' => $config
         ));
 
-        $hidden_value = $fieldset->addField('value_hidden','textarea',array(
+        $hidden_value = $fieldset->addField('value_hidden', 'textarea', array(
             'label' => Mage::helper('webforms')->__('Hidden field value'),
             'name' => 'value[hidden]',
             'note' => Mage::helper('webforms')->__("You can use variables to store dynamic information. Example:<br><i>{{var product.sku}}<br>{{var category.name}}<br>{{var customer.email}}<br>{{var url}}</i>")
         ));
 
-        $image_resize = $fieldset->addField('value_image_resize','select',array(
+        $image_resize = $fieldset->addField('value_image_resize', 'select', array(
             'label' => Mage::helper('webforms')->__('Resize uploaded image'),
             'name' => 'value[image_resize]',
-            'values'   => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ));
 
-        $image_resize_width = $fieldset->addField('value_image_resize_width','text',array(
+        $image_resize_width = $fieldset->addField('value_image_resize_width', 'text', array(
             'label' => Mage::helper('webforms')->__('Maximum width'),
             'name' => 'value[image_resize_width]',
             'class' => 'validate-number'
         ));
 
-        $image_resize_height = $fieldset->addField('value_image_resize_height','text',array(
+        $image_resize_height = $fieldset->addField('value_image_resize_height', 'text', array(
             'label' => Mage::helper('webforms')->__('Maximum height'),
             'name' => 'value[image_resize_height]',
             'class' => 'validate-number'
         ));
 
         $fieldset->addField('email_subject', 'select', array(
-            'label'     => Mage::helper('webforms')->__('Use field value as e-mail subject'),
-            'title'     => Mage::helper('webforms')->__('Use field value as e-mail subject'),
-            'name'      => 'email_subject',
-            'note'      => Mage::helper('webforms')->__('This field value will be used as a subject in notification e-mail'),
-            'required'  => false,
-            'values'   => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
+            'label' => Mage::helper('webforms')->__('Use field value as e-mail subject'),
+            'title' => Mage::helper('webforms')->__('Use field value as e-mail subject'),
+            'name' => 'email_subject',
+            'note' => Mage::helper('webforms')->__('This field value will be used as a subject in notification e-mail'),
+            'required' => false,
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ));
 
-        
+
         $required = $fieldset->addField('required', 'select', array(
-            'label'     => Mage::helper('webforms')->__('Required'),
-            'title'     => Mage::helper('webforms')->__('Required'),
-            'name'      => 'required',
-            'required'  => false,
-            'values'   => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
+            'label' => Mage::helper('webforms')->__('Required'),
+            'title' => Mage::helper('webforms')->__('Required'),
+            'name' => 'required',
+            'required' => false,
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ));
 
-        $validation_advice = $fieldset->addField('validation_advice', 'text',array(
-            'label'     => Mage::helper('webforms')->__('Custom validation advice'),
-            'name'      => 'validation_advice',
-            'note'      => Mage::helper('webforms')->__('Set custom text for the validation error message. If empty <b>&quot;This is a required field.&quot;</b> will be used'),
+        $validation_advice = $fieldset->addField('validation_advice', 'text', array(
+            'label' => Mage::helper('webforms')->__('Custom validation advice'),
+            'name' => 'validation_advice',
+            'note' => Mage::helper('webforms')->__('Set custom text for the validation error message. If empty <b>&quot;This is a required field.&quot;</b> will be used'),
         ));
 
-        $fieldset->addField('position','text',array(
+        $fieldset->addField('position', 'text', array(
             'label' => Mage::helper('webforms')->__('Position'),
             'required' => true,
             'name' => 'position',
@@ -301,47 +362,48 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
         ));
 
         $fieldset->addField('is_active', 'select', array(
-            'label'     => Mage::helper('webforms')->__('Status'),
-            'title'     => Mage::helper('webforms')->__('Status'),
-            'name'      => 'is_active',
-            'note'      => Mage::helper('webforms')->__('If assigned field set is not active the field won`t be displayed'),
-            'required'  => false,
-            'options'   => Mage::getModel('webforms/webforms')->getAvailableStatuses(),
+            'label' => Mage::helper('webforms')->__('Status'),
+            'title' => Mage::helper('webforms')->__('Status'),
+            'name' => 'is_active',
+            'note' => Mage::helper('webforms')->__('If assigned field set is not active the field won`t be displayed'),
+            'required' => false,
+            'options' => Mage::getModel('webforms/webforms')->getAvailableStatuses(),
         ));
-        
+
         $form->addField('webform_id', 'hidden', array(
-            'name'      => 'webform_id',
-            'value'   => 1,
+            'name' => 'webform_id',
+            'value' => 1,
         ));
-        
-        $form->addField('saveandcontinue','hidden',array(
+
+        $form->addField('saveandcontinue', 'hidden', array(
             'name' => 'saveandcontinue'
         ));
 
         Mage::dispatchEvent('webforms_adminhtml_fields_edit_tab_information_prepare_form', array('form' => $form, 'fieldset' => $fieldset));
-        
+
         if (!$model->getId()) {
             $model->setData('is_active', '0');
         }
-        
-        if(Mage::getSingleton('adminhtml/session')->getWebFormsData())
-        {
+
+        if (Mage::getSingleton('adminhtml/session')->getWebFormsData()) {
             $form->setValues(Mage::getSingleton('adminhtml/session')->getWebFormsData());
             Mage::getSingleton('adminhtml/session')->setWebFormsData(null);
-        } elseif(Mage::registry('field')){
+        } elseif (Mage::registry('field')) {
             $form->setValues(Mage::registry('field')->getData());
-        } 
+        }
 
         $webformId = $this->getRequest()->getParam('webform_id');
         // set default field values
-        if(!Mage::registry('field')->getId()){
+        if (!Mage::registry('field')->getId()) {
             $form->setValues(array(
                 'webform_id' => $webformId,
-                'position' => $model->getResource()->getNextPosition($webformId)
+                'position' => $model->getResource()->getNextPosition($webformId),
+                'value_dropzone_text' => Mage::helper('webforms')->__('Add files or drop here'),
+                'value_dropzone_maxfiles' => 5
             ));
         }
 
-        $this->setChild('form_after', $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence','fields_information_dependence')
+        $this->setChild('form_after', $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence', 'fields_information_dependence')
             ->addFieldMap($type->getHtmlId(), $type->getName())
             ->addFieldMap($required->getHtmlId(), $required->getName())
             ->addFieldMap($number_min->getHtmlId(), $number_min->getName())
@@ -370,6 +432,14 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
             ->addFieldMap($image_resize_height->getHtmlId(), $image_resize_height->getName())
             ->addFieldMap($assign_customer_id_by_email->getHtmlId(), $assign_customer_id_by_email->getName())
             ->addFieldMap($autocomplete_choices->getHtmlId(), $autocomplete_choices->getName())
+            ->addFieldMap($multiselect->getHtmlId(), $multiselect->getName())
+            ->addFieldMap($dropzone->getHtmlId(), $dropzone->getName())
+            ->addFieldMap($dropzone_text->getHtmlId(), $dropzone_text->getName())
+            ->addFieldMap($dropzone_maxfiles->getHtmlId(), $dropzone_maxfiles->getName())
+            ->addFieldMap($dropzone_image->getHtmlId(), $dropzone_image->getName())
+            ->addFieldMap($dropzone_image_text->getHtmlId(), $dropzone_image_text->getName())
+            ->addFieldMap($dropzone_image_maxfiles->getHtmlId(), $dropzone_image_maxfiles->getName())
+            ->addFieldMap($dob_customer->getHtmlId(), $dob_customer->getName())
             ->addFieldDependence(
                 $hint->getName(),
                 $type->getName(),
@@ -436,6 +506,11 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
                 'select'
             )
             ->addFieldDependence(
+                $multiselect->getName(),
+                $type->getName(),
+                'select'
+            )
+            ->addFieldDependence(
                 $options_radio->getName(),
                 $type->getName(),
                 'select/radio'
@@ -464,6 +539,36 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
                 $allowed_extensions->getName(),
                 $type->getName(),
                 'file'
+            )
+            ->addFieldDependence(
+                $dropzone->getName(),
+                $type->getName(),
+                'file'
+            )
+            ->addFieldDependence(
+                $dropzone_text->getName(),
+                $type->getName(),
+                'file'
+            )
+            ->addFieldDependence(
+                $dropzone_maxfiles->getName(),
+                $type->getName(),
+                'file'
+            )
+            ->addFieldDependence(
+                $dropzone_image->getName(),
+                $type->getName(),
+                'image'
+            )
+            ->addFieldDependence(
+                $dropzone_image_text->getName(),
+                $type->getName(),
+                'image'
+            )
+            ->addFieldDependence(
+                $dropzone_image_maxfiles->getName(),
+                $type->getName(),
+                'image'
             )
             ->addFieldDependence(
                 $html_content->getName(),
@@ -500,9 +605,14 @@ class VladimirPopov_WebForms_Block_Adminhtml_Fields_Edit_Tab_Information
                 $type->getName(),
                 'autocomplete'
             )
+            ->addFieldDependence(
+                $dob_customer->getName(),
+                $type->getName(),
+                'date/dob'
+            )
 
         );
-    
+
         return parent::_prepareForm();
     }
 }  

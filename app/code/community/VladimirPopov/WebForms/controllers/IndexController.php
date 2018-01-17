@@ -76,4 +76,4 @@ class VladimirPopov_WebForms_IndexController extends Mage_Core_Controller_Front_
         $this->getResponse()->setBody(htmlspecialchars(json_encode($result), ENT_NOQUOTES));
     }
 
-}  
+}

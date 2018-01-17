@@ -131,6 +131,15 @@ class VladimirPopov_WebForms_Model_Mysql4_Fields
             $value["options_checkbox"] = $value["options"];
             $value["options_contact"] = $value["options"];
         }
+        if (!empty($value["dropzone"])) {
+            $value["dropzone_image"] = $value["dropzone"];
+        }
+        if (!empty($value["dropzone_text"])) {
+            $value["dropzone_text_image"] = $value["dropzone_text"];
+        }
+        if (!empty($value["dropzone_maxfiles"])) {
+            $value["dropzone_maxfiles_image"] = $value["dropzone_maxfiles"];
+        }
         $object->setValue($value);
 
         Mage::dispatchEvent('webforms_field_load_after', array('field' => $object));

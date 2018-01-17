@@ -69,26 +69,39 @@ class VladimirPopov_WebForms_Model_Mysql4_Results_Collection
         return $this;
     }
 
-    public function addFieldFilter($field_id, $value)
+    public function addFieldFilter($field_id, $value, $strict = false)
     {
         $field = Mage::getModel('webforms/fields')->load($field_id);
-        $cond = "results_values_$field_id.value like '%" . trim(str_replace("'", "\\'", $value)) . "%'";
+        $search_value = "";
+        $prefix = '%';
+        if ($strict == true) {
+            $prefix = '';
+        }
+        $cond = "";
+        if (is_string($value)) {
+            $search_value = trim(str_replace(array("\\"), array("\\\\"), $value));
+            $search_value = trim(str_replace(array("'"), array("\\'"), $search_value));
+            $cond = "results_values_$field_id.value like '" . $prefix . $search_value . $prefix . "'";
+        }
         if ($field->getType() == 'select' || $field->getType() == 'select/radio') {
-            $cond = "results_values_$field_id.value like '" . trim(str_replace("'", "\\'", $value)) . "'";
+            $cond = "results_values_$field_id.value like '" . $search_value . "'";
         }
         if (is_array($value)) {
             if (strstr($field->getType(), 'date')) {
-                if ($value['from']) $value['from'] = "'" . date($field->getDbDateFormat(), strtotime($value['orig_from'])) . "'";
-                if ($value['to']) $value['to'] = "'" . date($field->getDbDateFormat(), strtotime($value['orig_to'])) . "'";
+                if (!empty($value['from'])) $value['from'] = "'" . date($field->getDbDateFormat(), strtotime($value['orig_from'])) . "'";
+                if (!empty($value['to'])) $value['to'] = "'" . date($field->getDbDateFormat(), strtotime($value['orig_to'])) . "'";
             }
-            if ($value['from']) {
+            if (!empty($value['from'])) {
                 $cond = "results_values_$field_id.value >= $value[from]";
             }
-            if ($value['to']) {
+            if (!empty($value['to'])) {
                 $cond = "results_values_$field_id.value <= $value[to]";
             }
-            if ($value['from'] && $value['to']) {
+            if (!empty($value['from']) && !empty($value['to'])) {
                 $cond = "results_values_$field_id.value >= $value[from] AND results_values_$field_id.value <= $value[to]";
+            }
+            if (!empty($value['in']) && is_array($value['in'])) {
+                $cond = "results_values_$field_id.value IN ('" . implode("','", str_replace("'", "\'", $value['in'])) . "')";
             }
         }
         $this->getSelect()
@@ -98,5 +111,6 @@ class VladimirPopov_WebForms_Model_Mysql4_Results_Collection
         $this->getSelect()
             ->where("results_values_$field_id.field_id = $field_id AND $cond");
 
+        return $this;
     }
 }

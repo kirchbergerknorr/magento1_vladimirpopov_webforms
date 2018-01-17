@@ -44,7 +44,8 @@
 					Effect.Fade('webform_<?php echo $this->getUid()?>_success_text',{
 						duration:0.5, from:0, to:1
 					});
-					if(<?php echo (int)$this->getData('scroll_to')?>) $('webform_<?php echo $this->getUid()?>_success_text').scrollTo();
+					if(<?php echo (int)$this->getData('scroll_to')?>)
+					    Effect.ScrollTo('webform_<?php echo $this->getUid()?>_success_text',{diration:'0.1', offset:-window.innerHeight/2});
                 }
 
 			});

@@ -90,7 +90,6 @@ class VladimirPopov_WebForms_Block_Adminhtml_Reply_Results
                     } else {
                         if ($field->getType() == 'image') {
                             $config['filter'] = false;
-                            $config['width'] = Mage::getStoreConfig('webforms/images/grid_thumbnail_width') . 'px';
                         }
                         if ($field->getType() == 'image' || $field->getType() == 'file') {
                             $config['renderer'] = 'VladimirPopov_WebForms_Block_Adminhtml_Results_Renderer_Files';

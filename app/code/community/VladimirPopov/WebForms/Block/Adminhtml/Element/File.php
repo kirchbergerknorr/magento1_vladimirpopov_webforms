@@ -30,8 +30,6 @@ class VladimirPopov_WebForms_Block_Adminhtml_Element_File extends Varien_Data_Fo
         $this->addClass('input-file');
         if ($this->getRequired()) {
             $this->removeClass('required-entry');
-            if (!$this->getData('value'))
-                $this->addClass('required-file');
         }
 
         $element = sprintf('<input id="%s" name="%s" %s />%s',
@@ -41,7 +39,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Element_File extends Varien_Data_Fo
             $this->getAfterElementHtml()
         );
 
-        return $this->_getPreviewHtml() . $element . $this->_getDeleteCheckboxHtml();
+        return $this->_getPreviewHtml() . $element . $this->_getDropzoneHtml();
     }
 
     protected function _getPreviewHtml()
@@ -53,40 +51,98 @@ class VladimirPopov_WebForms_Block_Adminhtml_Element_File extends Varien_Data_Fo
             $files = Mage::getModel('webforms/files')->getCollection()
                 ->addFilter('result_id', $result->getId())
                 ->addFilter('field_id', $field_id);
-            /** @var VladimirPopov_WebForms_Model_Files $file */
-            foreach ($files as $file){
-                if(file_exists($file->getFullPath())){
-                    $html .= '<nobr><a href="' . $file->getDownloadLink() . '">' . $file->getName() . '</a> <small>[' . $file->getSizeText() . ']</small></nobr><br>';
+            if (count($files)) {
+                $html .= '<div class="webforms-file-pool">';
+                if(count($files) > 1)
+                    $html .= $this->_getSelectAllHtml();
+                /** @var VladimirPopov_WebForms_Model_Files $file */
+                foreach ($files as $file) {
+                    $nameStart = '<div class="webforms-file-link-name">' . substr($file->getName(), 0, strlen($file->getName()) - 7) . '</div>';
+                    $nameEnd = '<div class="webforms-file-link-name-end">' . substr($file->getName(), -7) . '</div>';
+
+                    $html .= '<div class="webforms-file-cell">';
+
+                    if (file_exists($file->getFullPath())) {
+                        $html .= '<nobr><a class="grid-button-action webforms-file-link" href="' . $file->getDownloadLink(true) . '">' . $nameStart . $nameEnd . ' <small>[' . $file->getSizeText() . ']</small></a></nobr>';
+                    }
+
+                    $html .= $this->_getDeleteCheckboxHtml($file);
+
+                    $html .= '</div>';
+
                 }
+                $html .= '</div>';
             }
         }
+
         return $html;
     }
 
-    protected function _getDeleteCheckboxHtml()
+    protected function _getSelectAllHtml()
+    {
+        $id = $this->getHtmlId() . 'selectall';
+        $html = '';
+        $html .= '<script>function checkAll(elem){elem.up().up().select("input[type=checkbox]").invoke("writeAttribute","checked",elem.checked);}</script>';
+        $html .= '<div class="webforms-file-pool-selectall"><input id="' . $id . '" type="checkbox" class="webforms-file-delete-checkbox" onchange="checkAll(this)"/> <label for="' . $id . '">' . Mage::helper('webforms')->__('Select All') . '</label></div>';
+        return $html;
+    }
+
+    public function getDropzoneName()
+    {
+        $name = $this->getData('dropzone_name');
+        if ($suffix = $this->getForm()->getFieldNameSuffix()) {
+            $name = $this->getForm()->addSuffixToName($name, $suffix);
+        }
+        return $name;
+    }
+
+    protected function _getDropzoneHtml()
+    {
+        $config = array();
+
+        $config['url'] = Mage::getUrl('webforms/files/dropzone');
+        $config['fieldId'] = $this->getHtmlId();
+        $config['fieldName'] = $this->getDropzoneName();
+        $config['dropZone'] = $this->getData('dropzone') ? 1 : 0;
+        $config['dropZoneText'] = $this->getData('dropzone_text') ? $this->getData('dropzone_text') : Mage::helper('webforms')->__('Add files or drop here');
+        $config['maxFiles'] = $this->getData('dropzone_maxfiles') ? $this->getData('dropzone_maxfiles') : 5;
+        $config['allowedSize'] = $this->getData('allowed_size');
+        $config['allowedExtensions'] = $this->getData('allowed_extensions');
+        $config['restrictedExtensions'] = $this->getData('restricted_extensions');
+        $config['validationCssClass'] = '';
+        $config['errorMsgAllowedExtensions'] = Mage::helper('webforms')->__('Selected file has none of allowed extensions: %s');
+        $config['errorMsgRestrictedExtensions'] = Mage::helper('webforms')->__('Uploading of potentially dangerous files is not allowed.');
+        $config['errorMsgAllowedSize'] = Mage::helper('webforms')->__('Selected file exceeds allowed size: %s kB');
+        $config['errorMsgUploading'] = Mage::helper('webforms')->__('Error uploading file');
+        $config['errorMsgNotReady'] = Mage::helper('webforms')->__('Please wait... the upload is in progress.');
+
+        return '<script>new JsWebFormsDropzone(' . json_encode($config) . ')</script>';
+
+    }
+
+    protected function _getDeleteCheckboxHtml($file)
     {
         $html = '';
-        if ($this->getValue() && !$this->getRequired() && !is_array($this->getValue())) {
-            $checkboxId = sprintf('%s_delete', $this->getHtmlId());
+        if ($file) {
+            $checkboxId = 'delete_file_' . $file->getId();
+            $checkboxName = str_replace('file_', 'delete_file_', $this->getName()) . '[]';
+
             $checkbox = array(
                 'type' => 'checkbox',
-                'name' => str_replace('file_', 'delete_file_', $this->getName()),
-                'value' => '1',
-                'class' => 'checkbox',
+                'name' => $checkboxName,
+                'value' => $file->getLinkHash(),
+                'class' => 'webforms-file-delete-checkbox',
                 'id' => $checkboxId
             );
+
             $label = array(
                 'for' => $checkboxId
             );
-            if ($this->getDisabled()) {
-                $checkbox['disabled'] = 'disabled';
-                $label['class'] = 'disabled';
-            }
 
-            $html .= '<div class="' . $this->_getDeleteCheckboxSpanClass() . '">';
+            $html .= '<p>';
             $html .= $this->_drawElementHtml('input', $checkbox) . ' ';
             $html .= $this->_drawElementHtml('label', $label, false) . $this->_getDeleteCheckboxLabel() . '</label>';
-            $html .= '</div>';
+            $html .= '</p>';
         }
         return $html;
     }
@@ -98,7 +154,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Element_File extends Varien_Data_Fo
 
     protected function _getDeleteCheckboxLabel()
     {
-        return Mage::helper('adminhtml')->__('Delete File');
+        return Mage::helper('adminhtml')->__('Delete');
     }
 
     protected function _drawElementHtml($element, array $attributes, $closed = true)

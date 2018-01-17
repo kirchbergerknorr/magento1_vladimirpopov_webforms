@@ -83,7 +83,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Grid
             $Ids = (array)Mage::app()->getRequest()->getParam('internal_id');
             if (count($Ids) == 1 && !empty($Ids[0])) $Ids = explode(',', $Ids[0]);
             if (count($Ids)) {
-                $collection->addFieldToFilter('id', array('in' => $Ids));
+                $collection->addFieldToFilter('main_table.id', array('in' => $Ids));
             }
         }
 
@@ -156,6 +156,16 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Grid
             'renderer' => $renderer
         ));
 
+        if (Mage::registry('webform_data')->getApprove()) {
+            $this->addColumn('approved', array(
+                'header' => Mage::helper('webforms')->__('Status'),
+                'index' => 'approved',
+                'type' => 'options',
+                'options' => Mage::getModel('webforms/results')->getApprovalStatuses(),
+                'frame_callback' => array($this, 'decorateStatus')
+            ));
+        }
+
         $fields = Mage::getModel('webforms/fields')
             ->setStoreId($this->getRequest()->getParam('store'))
             ->getCollection()
@@ -186,11 +196,6 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Grid
                 if ($this->_isExport) {
                     $config['renderer'] = false;
                 } else {
-                    if ($field->getType() == 'image') {
-                        $config['filter'] = false;
-                        $config['width'] = Mage::getStoreConfig('webforms/images/grid_thumbnail_width') . 'px';
-                    }
-
                     if ($field->getType() == 'image' || $field->getType() == 'file') {
                         $config['renderer'] = 'VladimirPopov_WebForms_Block_Adminhtml_Results_Renderer_Files';
                     }
@@ -256,16 +261,6 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Grid
                 'sortable' => false,
                 'filter' => false,
                 'filter_condition_callback' => array($this, '_filterStoreCondition'),
-            ));
-        }
-
-        if (Mage::registry('webform_data')->getApprove()) {
-            $this->addColumn('approved', array(
-                'header' => Mage::helper('webforms')->__('Status'),
-                'index' => 'approved',
-                'type' => 'options',
-                'options' => Mage::getModel('webforms/results')->getApprovalStatuses(),
-                'frame_callback' => array($this, 'decorateStatus')
             ));
         }
 

@@ -1,8 +1,10 @@
-<select name='<?php echo $this->getFieldName() ?>' id='<?php echo $this->getFieldId() ?>'
+<select name='<?php echo $this->getFieldName() ?><?php if($this->getMultiselect()) echo '[]'?>' id='<?php echo $this->getFieldId() ?>'
         class='<?php echo $this->getFieldClass() ?>'
         aria-labelledby="label_<?php echo $this->getFieldId() ?>"
-        <?php if($this->getField()->getRequired()) {?>required<?php }?>
-        style='<?php echo $this->getFieldStyle() ?>' <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>>
+        <?php if($this->getField()->getRequired()) {?>aria-required="true"<?php }?>
+        <?php if($this->getField()->getBrowserAutocomplete()) { ?>autocomplete="<?php echo $this->getField()->getBrowserAutocomplete()?>" <?php }?>
+        style='<?php echo $this->getFieldStyle() ?>' <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>
+        <?php if ($this->getMultiselect()) echo 'multiple'?>>
 
     <?php
 

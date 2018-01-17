@@ -2,4 +2,4 @@
     <h3><?php echo $this->getResult()->getEmailSubject()?></h3>
     <p class="form-buttons"><?php echo $this->getButtonsHtml() ?></p>
 </div>
-<?php echo $this->getResult()->toHtml() ?>
+<?php echo $this->getResult()->toHtml('admin', array('adminhtml_downloads' => true, 'explicit_links' => true)) ?>

@@ -197,7 +197,7 @@ class VladimirPopov_WebForms_Model_Fields extends VladimirPopov_WebForms_Model_A
         //return default value
         $field_value = $this->getValue();
         $value = 3;
-        if (isset($field_value['stars_init']) && strlen($field_value['stars_init'])>0)
+        if (isset($field_value['stars_init']) && strlen($field_value['stars_init']) > 0)
             $value = (int)$field_value['stars_init'];
         return $value;
     }
@@ -382,7 +382,7 @@ class VladimirPopov_WebForms_Model_Fields extends VladimirPopov_WebForms_Model_A
 
     public function getHiddenFieldValue()
     {
-        if($this->getConfig('field_value')) return $this->getConfig('field_value');
+        if ($this->getConfig('field_value')) return $this->getConfig('field_value');
 
         $result = $this->getData('result');
         $customer_value = $result ? $result->getData('field_' . $this->getId()) : false;
@@ -428,6 +428,78 @@ class VladimirPopov_WebForms_Model_Fields extends VladimirPopov_WebForms_Model_A
         }
 
         return $filter;
+    }
+
+    public function validate($value)
+    {
+        $errors = array();
+        switch ($this->getType()) {
+            case 'file':
+            case 'image':
+                $file = $value;
+                if (!empty($file['error']) && $file['error'] == UPLOAD_ERR_INI_SIZE) {
+                    $errors[] = Mage::helper('webforms')->__('Uploaded file %s exceeds allowed limit: %s', $file['name'], ini_get('upload_max_filesize'));
+                }
+                if (isset($file['name']) && file_exists($file['tmp_name'])) {
+                    $filesize = round($file['size'] / 1024);
+                    $images_upload_limit = Mage::getStoreConfig('webforms/images/upload_limit');
+                    if ($this->getWebform()->getImagesUploadLimit() > 0) {
+                        $images_upload_limit = $this->getWebform()->getImagesUploadLimit();
+                    }
+                    $files_upload_limit = Mage::getStoreConfig('webforms/files/upload_limit');
+                    if ($this->getWebform()->getFilesUploadLimit() > 0) {
+                        $files_upload_limit = $this->getWebform()->getFilesUploadLimit();
+                    }
+                    if ($this->getType() == 'image') {
+                        // check file size
+                        if ($filesize > $images_upload_limit && $images_upload_limit > 0) {
+                            $errors[] = Mage::helper('webforms')->__('Uploaded image %s (%s kB) exceeds allowed limit: %s kB', $file['name'], $filesize, $images_upload_limit);
+                        }
+
+                        // check that file is valid image
+                        if (!@getimagesize($file['tmp_name'])) {
+                            $errors[] = Mage::helper('webforms')->__('Unsupported image compression: %s', $file['name']);
+                        }
+
+                    } else {
+                        // check file size
+                        if ($filesize > $files_upload_limit && $files_upload_limit > 0) {
+                            $errors[] = Mage::helper('webforms')->__('Uploaded file %s (%s kB) exceeds allowed limit: %s kB', $file['name'], $filesize, $files_upload_limit);
+                        }
+
+
+                    }
+                    $allowed_extensions = $this->getAllowedExtensions();
+                    // check for allowed extensions
+                    if (count($allowed_extensions)) {
+                        preg_match('/\.([^\.]+)$/', $file['name'], $matches);
+                        $file_ext = strtolower($matches[1]);
+                        // check file extension
+                        if (!in_array($file_ext, $allowed_extensions)) {
+                            $errors[] = Mage::helper('webforms')->__('Uploaded file %s has none of allowed extensions: %s', $file['name'], implode(', ', $allowed_extensions));
+                        }
+                    }
+
+                    $restricted_extensions = $this->getRestrictedExtensions();
+                    // check for restricted extensions
+                    if (count($restricted_extensions)) {
+                        preg_match('/\.([^\.]+)$/', $file['name'], $matches);
+                        $file_ext = strtolower($matches[1]);
+                        if (in_array($file_ext, $restricted_extensions)) {
+                            $errors[] = Mage::helper('webforms')->__('Uploading of potentially dangerous files is not allowed.');
+                        }
+                        if (class_exists('finfo')) {
+                            $finfo = new finfo(FILEINFO_MIME_TYPE);
+                            $type = $finfo->file($file['tmp_name']);
+                            if (strstr($type, 'php') || strstr($type, 'python') || strstr($type, 'perl')) {
+                                $errors[] = Mage::helper('webforms')->__('Uploading of potentially dangerous files is not allowed.');
+                            }
+                        }
+                    }
+                }
+                break;
+        }
+        return $errors;
     }
 
     public function toHtml()
@@ -549,6 +621,11 @@ class VladimirPopov_WebForms_Model_Fields extends VladimirPopov_WebForms_Model_A
                 $config['template'] = 'webforms/fields/wysiwyg.phtml';
                 break;
             case 'select':
+                $config['multiselect'] = $this->getValue('multiselect');
+                if ($config['multiselect']) {
+                    $config['field_class'] .= " multiselect";
+                    $this->setData('customer_value', str_replace(",", "\n", $customer_value));
+                }
                 $config['field_options'] = $this->getOptionsArray();
                 $config['template'] = 'webforms/fields/select.phtml';
                 break;
@@ -577,10 +654,12 @@ class VladimirPopov_WebForms_Model_Fields extends VladimirPopov_WebForms_Model_A
                 break;
             case 'image':
             case 'file':
+                $config['dropzone_field_name'] = $config['field_name'];
+                $config['dropzone'] = $this->getValue('dropzone');
                 $config['field_id'] = 'file_' . $this->getId();
                 $config['field_name'] = $config['field_id'];
                 $config['files'] = false;
-                if($result && $result->getId()){
+                if ($result && $result->getId()) {
                     $config['files'] = Mage::getModel('webforms/files')->getCollection()->addFilter('result_id', $result->getId())->addFilter('field_id', $this->getId());
                 }
                 $config['template'] = 'webforms/fields/file.phtml';
@@ -605,6 +684,9 @@ class VladimirPopov_WebForms_Model_Fields extends VladimirPopov_WebForms_Model_A
                 break;
             case 'date/dob':
                 $block_type = 'customer/widget_dob';
+                if($this->getValue('dob_customer') && Mage::helper('customer')->getCustomer()){
+                    $config['time'] = strtotime(Mage::helper('customer')->getCustomer()->getDob());
+                }
                 if ($customer_value) {
                     // set dob
                     $config['time'] = strtotime($customer_value);
@@ -644,6 +726,7 @@ class VladimirPopov_WebForms_Model_Fields extends VladimirPopov_WebForms_Model_A
             if (substr($regexp, 0, 1) == '/' && substr($regexp, strlen($regexp) - 1, strlen($regexp)) == '/')
                 $regexp = substr($regexp, 1, -1);
             $regexp = str_replace('\\', '\\\\', $regexp);
+            $regexp = trim(str_replace("'", "\'", $regexp));
 
             $validate_message = trim(str_replace('\'', '\\\'', $this->getData('validate_message')));
 

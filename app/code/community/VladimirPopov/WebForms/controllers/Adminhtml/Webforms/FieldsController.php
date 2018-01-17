@@ -98,6 +98,11 @@ class VladimirPopov_WebForms_Adminhtml_Webforms_FieldsController
                     case 'textarea':
                         if (!empty($postData["hint_textarea"])) $postData["hint"] = $postData["hint_textarea"];
                         break;
+                    case 'image':
+                        if (!empty($postData["value"]["dropzone_image"])) $postData["value"]["dropzone"] = $postData["value"]["dropzone_image"];
+                        if (!empty($postData["value"]["dropzone_text_image"])) $postData["value"]["dropzone_text"] = $postData["value"]["dropzone_text_image"];
+                        if (!empty($postData["value"]["dropzone_maxfiles_image"])) $postData["value"]["dropzone_maxfiles"] = $postData["value"]["dropzone_maxfiles_image"];
+                        break;
                 }
                 $webform_id = $postData["webform_id"];
                 $saveandcontinue = $this->getRequest()->getParam('back');

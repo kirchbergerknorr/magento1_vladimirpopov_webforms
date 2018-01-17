@@ -8,6 +8,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Edit_Form
         parent::_prepareForm();
 
         $result = Mage::registry('result');
+        /** @var VladimirPopov_WebForms_Model_Webforms $webform */
         $webform = Mage::registry('webform');
 
         $form = new Varien_Data_Form(array
@@ -109,6 +110,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Edit_Form
             ));
 
             foreach ($fs_data['fields'] as $field) {
+                /** @var VladimirPopov_WebForms_Model_Fields $type */
                 $type = 'text';
                 $config = array
                 (
@@ -165,7 +167,15 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Edit_Form
 
                     case 'select':
                         $type = 'select';
+
                         $config['options'] = $field->getSelectOptions();
+
+                        if($field->getValue('multiselect')) {
+                            $type = 'multiselect';
+                            $value = explode("\n", $result->getData('field_' . $field->getId()));
+                            $result->setData('field_' . $field->getId(), $value);
+                            $config['values'] = $field->getOptionsArray();
+                        }
                         break;
 
                     case 'subscribe':
@@ -188,7 +198,15 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Edit_Form
                         $config['field_id'] = $field->getId();
                         $config['result_id'] = $result->getId();
                         $config['url'] = $result->getFilePath($field->getId());
+                        $config['dropzone_name'] = $config['name'];
                         $config['name'] = 'file_' . $field->getId();
+
+                        $config['dropzone'] = $field->getValue('dropzone');
+                        $config['dropzone_text'] = $field->getValue('dropzone_text');
+                        $config['dropzone_maxfiles'] = $field->getValue('dropzone_maxfiles');
+                        $config['allowed_size'] = $webform->getUploadLimit($field->getType());
+                        $config['allowed_extensions'] = $field->getAllowedExtensions();
+                        $config['restricted_extensions'] = $field->getRestrictedExtensions();
                         break;
 
                     case 'image':
@@ -198,6 +216,13 @@ class VladimirPopov_WebForms_Block_Adminhtml_Results_Edit_Form
                         $config['url'] = $result->getFilePath($field->getId());
                         $config['name'] = 'file_' . $field->getId();
                         $fieldset->addType('image', Mage::getConfig()->getBlockClassName('webforms/adminhtml_element_image'));
+
+                        $config['dropzone'] = $field->getValue('dropzone');
+                        $config['dropzone_text'] = $field->getValue('dropzone_text');
+                        $config['dropzone_maxfiles'] = $field->getValue('dropzone_maxfiles');
+                        $config['allowed_size'] = $webform->getUploadLimit($field->getType());
+                        $config['allowed_extensions'] = $field->getAllowedExtensions();
+                        $config['restricted_extensions'] = $field->getRestrictedExtensions();
                         break;
 
                     case 'html':

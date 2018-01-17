@@ -51,8 +51,11 @@ class VladimirPopov_WebForms_Model_Files extends Mage_Core_Model_Abstract
         }
     }
 
-    public function getDownloadLink()
+    public function getDownloadLink($adminhtml = false)
     {
+        if($adminhtml){
+            return Mage::helper('adminhtml')->getUrl('adminhtml/webforms_files/download', array('hash' => $this->getLinkHash()));
+        }
         return Mage::app()->getStore($this->getResult()->getStoreId())->getUrl('webforms/files/download', array('hash' => $this->getLinkHash()));
     }
 
@@ -83,16 +86,19 @@ class VladimirPopov_WebForms_Model_Files extends Mage_Core_Model_Abstract
         if (strstr($file_info["mime"], "bmp"))
             return false;
 
+        if (!$height && !empty($file_info[0]) && !empty($file_info[1])) {
+            $height = round($file_info[1] * ($width / $file_info[0]));
+        }
+        $thumbnail_filename = substr($this->getData('link_hash'),-10) . '_' . $width . 'x' . $height;
+
         if (file_exists($imageUrl)) {
-            if (!$height) {
-                $height = round($file_info[1] * ($width / $file_info[0]));
-            }
-            $imageResized = $this->getThumbnailDir() . DS . $this->getId() . '_' . $width . 'x' . $height;
+
+            $imageResized = $this->getThumbnailDir() . DS . $thumbnail_filename;
             if (!file_exists($imageResized) || Mage::getStoreConfig('webforms/images/cache') == 0) {
 
                 $this->setMemoryForImage();
                 $adapter = Varien_Image_Adapter::ADAPTER_GD2;
-                if (Mage::getStoreConfig('design/watermark_adapter/adapter') && class_exists(Varien_Image_Adapter_Imagemagic))
+                if (Mage::getStoreConfig('design/watermark_adapter/adapter') && class_exists("Varien_Image_Adapter_Imagemagic"))
                     $adapter = Mage::getStoreConfig('design/watermark_adapter/adapter');
                 $imageObj = new Varien_Image($imageUrl, $adapter);
                 $imageObj->keepAspectRatio(true);
@@ -106,7 +112,7 @@ class VladimirPopov_WebForms_Model_Files extends Mage_Core_Model_Abstract
         }
 
         $url = Mage::app()->getStore($this->getResult()->getStoreId())->getBaseUrl('media') . self::THUMBNAIL_DIR;
-        $url .= '/' . $this->getId() . '_' . $width . 'x' . $height;
+        $url .= '/' . $thumbnail_filename;
         return $url;
     }
 

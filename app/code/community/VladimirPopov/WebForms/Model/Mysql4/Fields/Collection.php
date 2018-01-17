@@ -69,6 +69,15 @@ class VladimirPopov_WebForms_Model_Mysql4_Fields_Collection
                     $unserialized_value["options_checkbox"] = $unserialized_value["options"];
                     $unserialized_value["options_contact"] = $unserialized_value["options"];
                 }
+                if (!empty($unserialized_value["dropzone"])) {
+                    $unserialized_value["dropzone_image"] = $unserialized_value["dropzone"];
+                }
+                if (!empty($unserialized_value["dropzone_text"])) {
+                    $unserialized_value["dropzone_text_image"] = $unserialized_value["dropzone_text"];
+                }
+                if (!empty($unserialized_value["dropzone_maxfiles"])) {
+                    $unserialized_value["dropzone_maxfiles_image"] = $unserialized_value["dropzone_maxfiles"];
+                }
                 $item->setValue($unserialized_value);
             } else {
                 // support for old value format

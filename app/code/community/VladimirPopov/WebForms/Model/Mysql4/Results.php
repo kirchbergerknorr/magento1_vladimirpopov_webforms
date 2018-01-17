@@ -26,13 +26,14 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
                 $field = Mage::getModel('webforms/fields')->load($field_id);
 
                 // assign customer ID if email found
-                if ($field->getType() == 'email' && $field->getValue('assign_customer_id_by_email') && !$object->getCustomerId()) {
+                if ($field->getType() == 'email' && $field->getValue('assign_customer_id_by_email') && !$object->getCustomerId() && $value) {
                     $customer = Mage::getModel('customer/customer');
-                    $customer->setWebsiteId(Mage::app()->getStore($object->getStoreId())->getWebsite())->loadByEmail($value);
+                    $customer->setWebsiteId(Mage::app()->getStore($object->getStoreId())->getWebsiteId())->loadByEmail($value);
                     if ($customer->getId()) {
                         $object->setCustomerId($customer->getId());
                     }
                 }
+
             }
         }
         return $this;
@@ -43,9 +44,11 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
         //insert field values
         if (count($object->getData('field')) > 0) {
             foreach ($object->getData('field') as $field_id => $value) {
+
                 if (is_array($value)) {
                     $value = implode("\n", $value);
                 }
+
                 $field = Mage::getModel('webforms/fields')->load($field_id);
                 if (strstr($field->getType(), 'date') && strlen($value) > 0) {
                     $date = new Zend_Date();
@@ -58,18 +61,43 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
                     $value = $field->getContactValueById($value);
                 }
 
-                if($value == $field->getHint()){
+                if ($value == $field->getHint()) {
                     $value = '';
                 }
 
-                // create key
-                $key = "";
+                // process dropZone
                 if ($field->getType() == 'file' || $field->getType() == 'image') {
-                    $key = Mage::helper('webforms')->randomAlphaNum(6);
-                    if ($object->getData('key_' . $field_id))
-                        $key = $object->getData('key_' . $field_id);
+
+                    if ($field->getValue('dropzone')) {
+                        $input = $value;
+
+                        $counter = 0;
+                        $maxFiles = $field->getValue('dropzone_maxfiles') ? $field->getValue('dropzone_maxfiles') : 5;
+                        if (!empty($input)) {
+                            $hash_array = explode(';', $input);
+                            foreach ($hash_array as $hash) {
+                                /** @var VladimirPopov_WebForms_Model_Dropzone $dropzone */
+                                $dropzone = Mage::getModel('webforms/dropzone')->loadByHash($hash);
+                                if ($dropzone->getId()) {
+                                    $file = $dropzone->toFile($object->getId());
+                                    $dropzone->delete();
+                                    $counter++;
+                                }
+                                if ($counter >= $maxFiles) break;
+                            }
+                        }
+                        $value = array();
+
+                        $select = $this->_getReadAdapter()->select()
+                            ->from($this->getTable('webforms/files'))
+                            ->where('result_id = ?', $object->getId())
+                            ->where('field_id = ?', $field_id);
+                        $result_value = $this->_getReadAdapter()->fetchAll($select);
+                        foreach ($result_value as $item) {
+                            $value[] = $item['name'];
+                        }
+                    }
                 }
-                $object->setData('key_' . $field_id, $key);
 
                 $select = $this->_getReadAdapter()->select()
                     ->from($this->getTable('webforms/results_values'))
@@ -78,11 +106,14 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
 
                 $result_value = $this->_getReadAdapter()->fetchAll($select);
 
+                if (is_array($value)) {
+                    $value = implode("\n", $value);
+                }
+
                 if (!empty($result_value[0])) {
                     $this->_getWriteAdapter()->update($this->getTable('webforms/results_values'), array(
-                            "value" => $value,
-                            "key" => $key
-                        ),
+                        "value" => $value
+                    ),
                         "id = " . $result_value[0]['id']
                     );
 
@@ -91,14 +122,11 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
                         "result_id" => $object->getId(),
                         "field_id" => $field_id,
                         "value" => $value,
-                        "key" => $key
                     ));
                 }
 
                 // update object
-                $object->setData('field_'.$field_id, $value);
-                $object->setData('key_'.$field_id, $key);
-
+                $object->setData('field_' . $field_id, $value);
 
             }
         }
@@ -108,7 +136,8 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
         return parent::_afterSave($object);
     }
 
-    protected function _afterLoad(Mage_Core_Model_Abstract $object)
+    protected
+    function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $webform = Mage::getModel('webforms/webforms')->load($object->getData('webform_id'));
 
@@ -129,7 +158,8 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
         return parent::_afterLoad($object);
     }
 
-    protected function _beforeDelete(Mage_Core_Model_Abstract $object)
+    protected
+    function _beforeDelete(Mage_Core_Model_Abstract $object)
     {
         //delete values
         $this->_getReadAdapter()->delete($this->getTable('webforms/results_values'),
@@ -138,7 +168,7 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
 
         //delete files
         $files = Mage::getModel('webforms/files')->getCollection()->addFilter('result_id', $object->getId());
-        foreach ($files as $file){
+        foreach ($files as $file) {
             $file->delete();
         }
 
@@ -151,23 +181,9 @@ class VladimirPopov_WebForms_Model_Mysql4_Results
         return parent::_beforeDelete($object);
     }
 
-    // this function helps delete folder recursively
-    /** @deprecated since 2.7.8 */
-    public function rrmdir($dir)
-    {
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (filetype($dir . "/" . $object) == "dir") $this->rrmdir($dir . "/" . $object); else unlink($dir . "/" . $object);
-                }
-            }
-            reset($objects);
-            rmdir($dir);
-        }
-    }
 
-    public function getSummaryRatings($webform_id, $store_id)
+    public
+    function getSummaryRatings($webform_id, $store_id)
     {
         $adapter = $this->_getReadAdapter();
 

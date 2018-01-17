@@ -303,6 +303,21 @@ class VladimirPopov_WebForms_Adminhtml_Webforms_WebFormsController
             if (empty($parse['errors'])) {
                 $webformsModel->import($importData);
                 if ($webformsModel->getId()) {
+                    // set form permission
+                    $username = Mage::getSingleton('admin/session')->getUser()->getUsername();
+                    $role = Mage::getModel('admin/user')->getCollection()->addFieldToFilter('username', $username)->getFirstItem()->getRole();
+                    $rule_all = Mage::getModel('admin/rules')->getCollection()
+                        ->addFilter('role_id', $role->getId())
+                        ->addFilter('resource_id', 'all')
+                        ->getFirstItem();
+                    if ($rule_all->getPermission() == 'deny') {
+                        Mage::getModel('admin/rules')
+                            ->setRoleId($role->getId())
+                            ->setResourceId('admin/webforms/webform_' . $webformsModel->getId())
+                            ->setRoleType('G')
+                            ->setPermission('allow')
+                            ->save();
+                    }
                     $this->_getSession()->addSuccess($this->__('Form "%s" successfully imported.', $webformsModel->getName()));
                 } else {
                     $this->_getSession()->addError($this->__('Unknown error happened during import operation.'));

@@ -6,14 +6,16 @@
     <col width="65"/>
     <col width="220"/>
     <col width="170"/>
-    <col width="40"/>
+<!--    <col width="40"/>-->
+    <?php if(Mage::registry('webform')->getApprove()):?>
     <col width="60"/>
+    <?php endif;?>
     <thead>
     <tr>
         <th><?php echo $this->__('ID') ?></th>
         <th><?php echo $this->__('Subject') ?></th>
         <th><?php echo $this->__('Date') ?></th>
-        <?php /* <th><?php echo $this->__('Replied') ?></th> */?>
+<!--        <th>--><?php //echo $this->__('Replied') ?><!--</th>-->
         <?php if(Mage::registry('webform')->getApprove()):?>
         <th><?php echo $this->__('Status') ?></th>
         <?php endif;?>
@@ -26,7 +28,7 @@
             <td style="white-space:nowrap;"><?php echo $result->getId() ?></td>
             <td title="<?php echo $this->escapeHtml($result->getEmailSubject());?>"><a href="<?php echo $this->getUrlResultView($result)?>"><?php echo $result->getEmailSubject()?></a></td>
             <td><?php echo Mage::helper('core')->formatDate($result->getCreatedTime(),'medium',true);?></td>
-            <?php /* <td><?php echo $this->getRepliedStatus($result) ?></td> */?>
+<!--            <td>--><?php //echo $this->getRepliedStatus($result) ?><!--</td>-->
             <?php if(Mage::registry('webform')->getApprove()):?>
             <td><?php echo $this->getApproveStatus($result) ?></td>
             <?php endif;?>

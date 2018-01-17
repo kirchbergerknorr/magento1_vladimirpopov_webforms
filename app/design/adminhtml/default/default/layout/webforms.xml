@@ -29,6 +29,9 @@
                 <file>webforms/adminhtml/logic.js</file>
             </action>
             <action method="addJs">
+                <file>webforms/dropzone.js</file>
+            </action>
+            <action method="addJs">
                 <file>webforms/adminhtml/validation.js</file>
             </action>
         </reference>
@@ -38,6 +41,9 @@
         <reference name="head">
             <action method="addJs">
                 <file>webforms/adminhtml/logic.js</file>
+            </action>
+            <action method="addJs">
+                <file>webforms/dropzone.js</file>
             </action>
             <action method="addJs">
                 <file>webforms/adminhtml/result.js</file>

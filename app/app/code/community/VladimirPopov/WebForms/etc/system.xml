@@ -194,7 +194,7 @@
 							<show_in_store>1</show_in_store>
 						</email_from>
                         <stoplist>
-                            <comment><![CDATA[Block specified e-mail addresses from submission]]></comment>
+                            <comment><![CDATA[Block specified e-mail addresses from submission. You can use Regular Expressions to block address ranges]]></comment>
                             <label>Block e-mail addresses</label>
                             <frontend_type>textarea</frontend_type>
                             <sort_order>30</sort_order>
@@ -318,16 +318,6 @@
 					<show_in_website>1</show_in_website>
 					<show_in_store>1</show_in_store>
 					<fields>
-						<validate_filename>
-							<label>Validate file names</label>
-							<comment><![CDATA[Allow only latin characters in file names]]></comment>
-							<frontend_type>select</frontend_type>
-							<source_model>adminhtml/system_config_source_yesno</source_model>
-							<sort_order>10</sort_order>
-							<show_in_default>1</show_in_default>
-							<show_in_website>1</show_in_website>
-							<show_in_store>1</show_in_store>
-						</validate_filename>
 						<upload_limit translate="label comment">
 							<label>Upload limit</label>
 							<comment><![CDATA[Maximum upload file size in kB]]></comment>
@@ -432,6 +422,39 @@
 							<show_in_website>1</show_in_website>
 							<show_in_store>1</show_in_store>
 						</webform>
+						<template>
+							<comment><![CDATA[Select template for the contacts form]]></comment>
+							<label>Template</label>
+							<frontend_type>select</frontend_type>
+							<source_model>webforms/webforms_template</source_model>
+							<sort_order>20</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+							<depends>
+								<preview_enabled>1</preview_enabled>
+							</depends>
+						</template>
+						<after_submission_form translate="label comment">
+							<label>Display form after submission</label>
+							<comment><![CDATA[Don't hide form after successful submission]]></comment>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>30</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</after_submission_form>
+						<scroll_to translate="label comment">
+							<label>Scroll to success message</label>
+							<comment><![CDATA[Scroll to the top of success message after form submission]]></comment>
+							<frontend_type>select</frontend_type>
+							<source_model>adminhtml/system_config_source_yesno</source_model>
+							<sort_order>40</sort_order>
+							<show_in_default>1</show_in_default>
+							<show_in_website>1</show_in_website>
+							<show_in_store>1</show_in_store>
+						</scroll_to>
 					</fields>
 				</contacts>
 			</groups>

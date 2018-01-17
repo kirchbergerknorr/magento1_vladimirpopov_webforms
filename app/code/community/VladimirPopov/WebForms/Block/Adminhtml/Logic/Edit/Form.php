@@ -59,7 +59,7 @@ class VladimirPopov_WebForms_Block_Adminhtml_Logic_Edit_Form
             'values' => Mage::registry('field')->getLogicTargetOptionsArray()
         ));
 
-        if (Mage::registry('field')->getType() == 'select/checkbox') {
+        if (Mage::registry('field')->getType() == 'select/checkbox' || Mage::registry('field')->getValue('multiselect')) {
             $fieldset->addField('aggregation', 'select', array(
                 'label' => Mage::helper('webforms')->__('Logic aggregation'),
                 'name' => 'aggregation',

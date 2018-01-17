@@ -7,6 +7,10 @@ function JsWebFormsLogicRuleCheck(logic, uid) {
         input = $$(GetFormContainerId(uid) + ' [name="field[' + logic['field_id'] + '][]"]');
         field_type = 'checkbox';
         selected = 'checked';
+        if(input[0].type && input[0].type == 'select-multiple'){
+            input = input[0];
+            selected = 'selected';
+        }
     } else {
         if (field[0].type == 'radio') {
             field_type = 'radio';
@@ -126,6 +130,8 @@ function JSWebFormsLogic(targets, logicRules, fieldMap, uid) {
             if (typeof(input[0]) != 'object') {
                 input = $$(GetFormContainerId(uid) + ' [name="field[' + config['field_id'] + '][]"]');
                 trigger_function = 'onclick';
+                if( input[0].type == 'select-multiple')
+                    trigger_function = 'onchange';
             } else {
                 if (input[0].type == 'radio') {
                     trigger_function = 'onclick';

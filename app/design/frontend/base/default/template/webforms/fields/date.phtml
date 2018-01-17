@@ -6,7 +6,8 @@
            style='<?php echo $this->getFieldStyle() ?>'
            value='<?php echo $this->getCustomerValue() ?>'
            aria-labelledby="label_<?php echo $this->getFieldId() ?>"
-           <?php if ($this->getField()->getRequired()) { ?>required<?php } ?>
+           <?php if($this->getField()->getBrowserAutocomplete()) { ?>autocomplete="<?php echo $this->getField()->getBrowserAutocomplete()?>" <?php }?>
+           <?php if ($this->getField()->getRequired()) { ?>aria-required="true"<?php } ?>
            <?php if ($this->getField()->getRequired()){ ?>readonly='readonly'<?php } ?>
     />
 </div>

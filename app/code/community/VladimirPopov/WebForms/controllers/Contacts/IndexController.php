@@ -26,11 +26,15 @@ class VladimirPopov_WebForms_Contacts_IndexController extends Mage_Contacts_Inde
 			$aw_antibot = $this->getLayout()->getBlock('antibot');
 			if($aw_antibot) 
 				$aw_antibot->setTemplate(false);
+
+			$template = 'webforms/default.phtml';
 			
 			// add web-form to the layout
 			$block = $this->getLayout()->createBlock('webforms/webforms','webforms',array(
-				'template' => 'webforms/default.phtml',
-				'webform_id' => Mage::getStoreConfig('webforms/contacts/webform')
+				'template' => $template,
+				'webform_id' => Mage::getStoreConfig('webforms/contacts/webform'),
+				'scroll_to' => Mage::getStoreConfig('webforms/contacts/scroll_to'),
+				'after_submission_form' => Mage::getStoreConfig('webforms/contacts/after_submission_form')
 			));
 			$this->getLayout()->getBlock('content')->append($block);
 		}

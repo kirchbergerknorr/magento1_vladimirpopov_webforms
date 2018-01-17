@@ -19,8 +19,8 @@ class VladimirPopov_WebForms_Block_Adminhtml_Webforms_Edit_Tab_Access
 
         $access_enable = $fieldset->addField('access_enable', 'select', array(
             'name' => 'access_enable',
-            'label'  => Mage::helper('webforms')->__('Limit customer access'),
-            'note'   => Mage::helper('webforms')->__('Limit access to the form for certain customer groups'),
+            'label' => Mage::helper('webforms')->__('Limit customer access'),
+            'note' => Mage::helper('webforms')->__('Limit access to the form for certain customer groups'),
             'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ));
 
@@ -40,8 +40,8 @@ class VladimirPopov_WebForms_Block_Adminhtml_Webforms_Edit_Tab_Access
 
         $dashboard_enable = $fieldset->addField('dashboard_enable', 'select', array(
             'name' => 'dashboard_enable',
-            'label'  => Mage::helper('webforms')->__('Add form to customer dashboard'),
-            'note'   => Mage::helper('webforms')->__('Add link to the form and submission results to customer dashboard menu'),
+            'label' => Mage::helper('webforms')->__('Add form to customer dashboard'),
+            'note' => Mage::helper('webforms')->__('Add link to the form and submission results to customer dashboard menu'),
             'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
         ));
 
@@ -55,28 +55,21 @@ class VladimirPopov_WebForms_Block_Adminhtml_Webforms_Edit_Tab_Access
             'values' => $this->getGroupOptions(),
         ));
 
-//        $this->setChild('form_after', $this->getLayout()->createBlock('adminhtml/widget_form_element_dependence','form_access_dependence')
-//                ->addFieldMap($access_enable->getHtmlId(), $access_enable->getName())
-//                ->addFieldMap($access_groups->getHtmlId(), $access_groups->getName())
-//                ->addFieldMap($dashboard_enable->getHtmlId(), $dashboard_enable->getName())
-//                ->addFieldMap($dashboard_groups->getHtmlId(), $dashboard_groups->getName())
-//                ->addFieldDependence(
-//                    $access_groups->getName(),
-//                    $access_enable->getName(),
-//                    1
-//                )
-//                ->addFieldDependence(
-//                    $dashboard_groups->getName(),
-//                    $dashboard_enable->getName(),
-//                    1
-//                )
-//        );
+        $fieldset = $form->addFieldset('file_access', array(
+            'legend' => Mage::helper('webforms')->__('File Access')
+        ));
 
-        if(Mage::getSingleton('adminhtml/session')->getWebFormsData())
-        {
+        $frontend_download = $fieldset->addField('frontend_download', 'select', array(
+            'name' => 'frontend_download',
+            'label' => Mage::helper('webforms')->__('Allow frontend file downloads'),
+            'note' => Mage::helper('webforms')->__('Adds file links to admin notification emails. Useful when you can not attach large files to email but need to be able to download them directly from the email program. Its recommended to turn it off for sensitive data.'),
+            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
+        ));
+
+        if (Mage::getSingleton('adminhtml/session')->getWebFormsData()) {
             $form->setValues(Mage::getSingleton('adminhtml/session')->getWebFormsData());
             Mage::getSingleton('adminhtml/session')->setWebFormsData(null);
-        } elseif(Mage::registry('webforms_data')){
+        } elseif (Mage::registry('webforms_data')) {
             $form->setValues(Mage::registry('webforms_data')->getData());
         }
 

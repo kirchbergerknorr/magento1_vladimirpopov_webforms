@@ -79,6 +79,8 @@ class VladimirPopov_WebForms_Model_Uploader
                     $model->save();
                 }
             }
+
+
         }
     }
 

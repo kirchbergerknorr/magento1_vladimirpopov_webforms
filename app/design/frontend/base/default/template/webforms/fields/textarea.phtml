@@ -3,6 +3,7 @@
           class='<?php echo $this->getFieldClass()?>'
           placeholder="<?php echo $hint ?>"
           aria-labelledby="label_<?php echo $this->getFieldId() ?>"
-          <?php if($this->getField()->getRequired()) {?>required<?php }?>
+          <?php if($this->getField()->getRequired()) {?>aria-required="true"<?php }?>
+          <?php if($this->getField()->getBrowserAutocomplete()) { ?>autocomplete="<?php echo $this->getField()->getBrowserAutocomplete()?>" <?php }?>
           style='<?php echo $this->getFieldStyle()?>' <?php if ($this->getField()->getDisabled()) { ?> disabled <?php } ?>
           ><?php echo htmlspecialchars($this->getFieldValue());?></textarea>

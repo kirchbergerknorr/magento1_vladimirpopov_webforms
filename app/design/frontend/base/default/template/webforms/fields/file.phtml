@@ -1,150 +1,94 @@
 <?php
-if ($this->getFiles()) {
+if ($this->getField()->getData('customer_value') && count($this->getFiles())) {
+    $this->getField()->setRequired(false);
+    $html = "";
+    $selectAllId = $this->getFieldId().'selectall';
+    $deleteCheckboxName = str_replace('file_', 'delete_file_', $this->getFieldName()) . '[]';
     ?>
+    <script>function checkAll(elem){elem.up().up().select("input[type=checkbox]").invoke("writeAttribute","checked",elem.checked);}</script>
 
-    <div class="webforms-uploaded-file">
+    <div class="webforms-file-pool">
+
+        <div class="webforms-file-pool-selectall">
+            <input id="<?php echo $selectAllId?>" type="checkbox" class="webforms-file-delete-checkbox" onchange="checkAll(this)"/> <label for="<?php echo $selectAllId?>"><?php echo  Mage::helper('webforms')->__('Select All')?></label>
+        </div>
 
         <?php
         $this->setFieldClass(str_replace('required-entry', '', $this->getFieldClass()));
         if ($this->getField()->getType() == 'file') {
             /** @var VladimirPopov_WebForms_Model_Files $file */
             foreach ($this->getFiles() as $file) {
-                ?>
+                $nameStart = '<div class="webforms-file-link-name">' . substr($file->getName(), 0, strlen($file->getName()) - 7) . '</div>';
+                $nameEnd = '<div class="webforms-file-link-name-end">' . substr($file->getName(), -7) . '</div>';
 
-                <nobr>
-                    <?php echo $file->getName() ?>
-                    <small>
-                        [<?php echo $file->getSizeText() ?>]
-                    </small>
-                </nobr>
+                $html .= '<div class="webforms-file-cell">';
 
-                <?php
+                if (file_exists($file->getFullPath())) {
+                    $html .= '<nobr><span class="grid-button-action webforms-file-link">' . $nameStart . $nameEnd . ' <small>[' . $file->getSizeText() . ']</small></span></nobr>';
+                }
+
+                $checkboxId = 'delete_file_' . $file->getId();
+                $html .= '<p><input type="checkbox"  id="'.$checkboxId.'" name ="'.$deleteCheckboxName.'" value="'.$file->getLinkHash().'" class="webforms-file-delete-checkbox"/><label for="'.$checkboxId.'">'.Mage::helper('webforms')->__('Delete').'</label></p>';
+
+                $html .= '</div>';
             }
         }
         if ($this->getField()->getType() == 'image') {
+            $width = Mage::getStoreConfig('webforms/images/grid_thumbnail_width');
+            $height = Mage::getStoreConfig('webforms/images/grid_thumbnail_height');
+
             foreach ($this->getFiles() as $file) {
-                if ($file->getThumbnail()) {
-                    ?>
-                    <img src="<?php echo $file->getThumbnail()?>"/>
-                    <?php
-                } else {
-                    ?>
+                $html .= '<div class="webforms-file-cell">';
 
-                    <nobr>
-                        <?php echo $file->getName() ?>
-                        <small>
-                            [<?php echo $file->getSizeText() ?>
-                            ]
-                        </small>
-                    </nobr>
+                if (file_exists($file->getFullPath())) {
+                    $nameStart = '<div class="webforms-file-link-name">' . substr($file->getName(), 0, strlen($file->getName()) - 7) . '</div>';
+                    $nameEnd = '<div class="webforms-file-link-name-end">' . substr($file->getName(), -7) . '</div>';
 
-                    <?php
+                    $thumbnail = $file->getThumbnail(100);
+                    if ($thumbnail) {
+                        $html .= '<span class="grid-button-action webforms-file-link">
+                            <figure>
+                                <p><img src="' . $file->getThumbnail($width, $height) . '"/></p>
+                                <figcaption>' . $file->getName() . ' <small>[' . $file->getSizeText() . ']</small></figcaption>
+                            </figure>
+                        </span>';
+                    } else {
+                        $html .= '<nobr><span class="grid-button-action webforms-file-link">' . $nameStart . $nameEnd . ' <small>[' . $file->getSizeText() . ']</small></span></nobr>';
+                    }
                 }
+                $checkboxId = 'delete_file_' . $file->getId();
+                $html .= '<p><input type="checkbox"  id="'.$checkboxId.'" name ="'.$deleteCheckboxName.'" value="'.$file->getLinkHash().'" class="webforms-file-delete-checkbox"/><label for="'.$checkboxId.'">'.Mage::helper('webforms')->__('Delete').'</label></p>';
+
+                $html .= '</div>';
             }
         }
-        if (!$this->getField()->getRequired()) {
-            ?>
-
-            <div class='webforms-uploaded-file-delete'>
-                <input type='checkbox' id='delete_<?php echo $this->getFieldId() ?>'
-                       name='delete_<?php echo $this->getFieldId() ?>' value='1'/>
-                <label class='webforms-uploaded-file-delete-label'
-                       for='delete_<?php echo $this->getFieldId() ?>'><?php echo Mage::helper('webforms')->__('Delete') ?></label>
-            </div>
-
-            <?php
-        }
+        echo $html;
         ?>
-
     </div>
 
     <?php
 }
 ?>
 
-<script>
-    function checkFile<?php echo $this->getField()->getId();?>(fieldObj, showAlert) {
-        //  preview
-        var previewEl = $('<?php echo $this->getFieldId() ?>_preview');
-        previewEl.update();
-
-        var error = "";
-        var FileName = fieldObj.value;
-        if (FileName.length == 0) return false;
-        var FileExt = FileName.substr(FileName.lastIndexOf('.') + 1).toLowerCase();
-        var FileSize = fieldObj.files[0].size;
-        var FileType = fieldObj.files[0].type;
-        var FileSizeKB = (FileSize / 1024).toFixed(2);
-        var allowedExtensions = <?php echo json_encode($this->getField()->getAllowedExtensions(), true)?>;
-        var allowedSize = <?php echo Mage::registry('webform')->getUploadLimit($this->getField()->getType())?>;
-        var restrictedExtensions = <?php echo json_encode($this->getField()->getRestrictedExtensions(), true)?>;
-
-        if (allowedExtensions.indexOf(FileExt) < 0 && allowedExtensions.length) {
-            error += "<?php echo Mage::helper('webforms')->__('Selected file has none of allowed extensions: %s', implode(', ', $this->getField()->getAllowedExtensions()));?>\n\n";
-        }
-
-        if (restrictedExtensions.indexOf(FileExt) >= 0 && restrictedExtensions.length) {
-            error += "<?php echo Mage::helper('webforms')->__('Uploading of potentially dangerous files is not allowed.');?>\n\n";
-        }
-
-        if (FileSizeKB > allowedSize && allowedSize > 0) {
-            error += "<?php echo Mage::helper('webforms')->__('Selected file exceeds allowed size: %s kB', Mage::registry('webform')->getUploadLimit($this->getField()->getType()));?>";
-        }
-
-        if (error) {
-            fieldObj.clear();
-            if (showAlert)
-                alert(error);
-            return false;
-        }
-
-        var ul = document.createElement('ul');
-        ul.setAttribute('class', 'file-preview');
-
-        var li = document.createElement('li');
-
-        var h3 = document.createElement('h3');
-        h3.update(fieldObj.files[0].name);
-        var p = document.createElement('p');
-        p.update('<?php echo Mage::helper('webforms')->__('type')?>: ' + FileType + '<br><?php echo Mage::helper('webforms')->__('size')?>: ' + FileSizeKB + 'KB');
-        var a = document.createElement('a');
-        a.setAttribute('class', 'file-cancel');
-        a.update('[<?php echo Mage::helper('webforms')->__('Cancel')?>]');
-        a.onclick = function () {
-            fieldObj.show();
-            fieldObj.value = '';
-            previewEl.update();
-        }
-
-        var ValidImageTypes = ["image/gif", "image/jpeg", "image/png"];
-        if (ValidImageTypes.indexOf(FileType) >= 0) {
-            var img = document.createElement('img');
-            img.setStyle({'width': '100%', 'max-width': '120px'});
-
-            li.appendChild(img);
-            var reader = new FileReader();
-
-            reader.onload = function (e) {
-                img.setAttribute('src', e.target.result);
-            }
-
-            reader.readAsDataURL(fieldObj.files[0]);
-        }
-        li.appendChild(h3);
-        li.appendChild(p);
-        li.appendChild(a);
-
-        ul.appendChild(li);
-
-        previewEl.appendChild(ul);
-        fieldObj.hide();
-
-        return true;
-    }
-</script>
-
 <input type='file' name='<?php echo $this->getFieldName() ?>' id='<?php echo $this->getFieldId() ?>'
-       class='<?php echo $this->getFieldClass() ?>' style='<?php echo $this->getFieldStyle() ?>'
-       onchange="checkFile<?php echo $this->getField()->getId(); ?>(this,1)"/>
+       class='<?php echo $this->getFieldClass() ?>' style='<?php echo $this->getFieldStyle() ?>'/>
 
-<div id="<?php echo $this->getFieldId() ?>_preview"></div>
+<script>
+    new JsWebFormsDropzone({
+        url: '<?php echo Mage::getUrl('webforms/files/dropzone', array('_secure' => true)) ?>',
+        fieldId: '<?php echo $this->getFieldId() ?>',
+        fieldName: '<?php echo $this->getDropzoneFieldName()?>',
+        dropZone: <?php echo $this->getField()->getValue('dropzone') ? 1 : 0?>,
+        dropZoneText: '<?php echo $this->getField()->getValue('dropzone_text') ? str_replace("'","\'",$this->getField()->getValue('dropzone_text')) : Mage::helper('webforms')->__('Add files or drop here')?>',
+        maxFiles: <?php echo $this->getField()->getValue('dropzone_maxfiles') ? $this->getField()->getValue('dropzone_maxfiles') : 5?>,
+        allowedSize: <?php echo Mage::registry('webform')->getUploadLimit($this->getField()->getType())?>,
+        allowedExtensions: <?php echo json_encode($this->getField()->getAllowedExtensions(), true)?>,
+        restrictedExtensions: <?php echo json_encode($this->getField()->getRestrictedExtensions(), true)?>,
+        validationCssClass: '<?php echo $this->getField()->getRequired() ? 'required-entry' : ''?>',
+        errorMsgAllowedExtensions: '<?php echo Mage::helper('webforms')->__('Selected file has none of allowed extensions: %s')?>',
+        errorMsgRestrictedExtensions: '<?php echo Mage::helper('webforms')->__('Uploading of potentially dangerous files is not allowed.')?>',
+        errorMsgAllowedSize: '<?php echo Mage::helper('webforms')->__('Selected file exceeds allowed size: %s kB')?>',
+        errorMsgUploading: '<?php echo Mage::helper('webforms')->__('Error uploading file')?>',
+        errorMsgNotReady: '<?php echo Mage::helper('webforms')->__('Please wait... the upload is in progress.')?>'
+    });
+</script>

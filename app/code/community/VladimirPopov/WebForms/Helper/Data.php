@@ -10,6 +10,7 @@ class VladimirPopov_WebForms_Helper_Data
 
     const DKEY = 'WF1DM';
     const SKEY = 'WFSRV';
+    const DEV_CHECK = true;
 
     public function getRealIp()
     {
@@ -39,7 +40,7 @@ class VladimirPopov_WebForms_Helper_Data
         return $recaptcha;
     }
 
-    public function getMageEdition()
+    final public function getMageEdition()
     {
         if (method_exists('Mage', 'getEdition')) {
             switch (Mage::getEdition()) {
@@ -175,6 +176,9 @@ class VladimirPopov_WebForms_Helper_Data
             // logic
             $head->addJs('webforms/logic.js', 'webforms');
 
+            // dropzone
+            $head->addJs('webforms/dropzone.js', 'webforms');
+
             // multistep
             $head->addJs('webforms/multistep.js', 'webforms');
 
@@ -203,7 +207,8 @@ class VladimirPopov_WebForms_Helper_Data
         }
 
         if (in_array('cms_page', $layout->getUpdate()->getHandles()) || in_array('webforms_index_index', $layout->getUpdate()->getHandles())) {
-            if (!$this->isProduction()) {
+            $production = $this->isProduction();
+            if (!$production['verified']) {
                 Mage::getSingleton('core/session')->addError($this->getNote());
             }
         }
@@ -214,7 +219,7 @@ class VladimirPopov_WebForms_Helper_Data
         return $this;
     }
 
-    protected function getDomain($url)
+    final protected function getDomain($url)
     {
         $url = str_replace(array('http://', 'https://', '/'), '', $url);
         $tmp = explode('.', $url);
@@ -236,12 +241,17 @@ class VladimirPopov_WebForms_Helper_Data
         );
 
         if (in_array($suffix, $exceptions))
-            return $tmp[$cnt - 3] . '.' . $tmp[$cnt - 2] . '.' . $tmp[$cnt - 1];
+            $domain = $tmp[$cnt - 3] . '.' . $tmp[$cnt - 2] . '.' . $tmp[$cnt - 1];
+        else
+            $domain = $suffix;
 
-        return $suffix;
+        $domain = explode(':',$domain);
+        $domain = $domain[0];
+
+        return $domain;
     }
 
-    public function verify($domain, $checkstr)
+    final protected function verify($domain, $checkstr)
     {
 
         if ("wf" . substr(sha1(self::DKEY . $domain), 0, 18) == substr($checkstr, 0, 20)) {
@@ -252,17 +262,27 @@ class VladimirPopov_WebForms_Helper_Data
             return true;
         }
 
-        if ("wf" . substr(sha1(self::SKEY . gethostbyname($_SERVER['SERVER_NAME'])), 0, 10) == substr($checkstr, 0, 12)) {
-            return true;
+        $dns_record = @dns_get_record($_SERVER['SERVER_NAME'],DNS_A);
+        if(isset($dns_record[0]) && !empty($dns_record[0]['ip'])) {
+
+            if ("wf" . substr(sha1(self::SKEY . $dns_record[0]['ip']), 0, 10) == substr($checkstr, 0, 12)) {
+                return true;
+            }
         }
 
-        if ("wf" . substr(sha1(self::SKEY . gethostbyname($domain)), 0, 10) == substr($checkstr, 0, 12)) {
-            return true;
+        $dns_record = @dns_get_record($domain,DNS_A);
+        if(isset($dns_record[0]) && !empty($dns_record[0]['ip'])) {
+            if ("wf" . substr(sha1(self::SKEY . $dns_record[0]['ip']), 0, 10) == substr($checkstr, 0, 12)) {
+                return true;
+            }
         }
 
         $base = $this->getDomain(parse_url(Mage::app()->getStore(0)->getConfig('web/unsecure/base_url'), PHP_URL_HOST));
-        if ("wf" . substr(sha1(self::SKEY . gethostbyname($base)), 0, 10) == substr($checkstr, 0, 12)) {
-            return true;
+        $dns_record = @dns_get_record($base,DNS_A);
+        if(isset($dns_record[0]) && !empty($dns_record[0]['ip'])) {
+            if ("wf" . substr(sha1(self::SKEY . $dns_record[0]['ip']), 0, 10) == substr($checkstr, 0, 12)) {
+                return true;
+            }
         }
 
         if (substr(sha1(self::SKEY . $base), 0, 8) == substr($checkstr, 12, 8))
@@ -271,31 +291,35 @@ class VladimirPopov_WebForms_Helper_Data
         if ($this->verifyIpMask(array($_SERVER['SERVER_ADDR'], $_SERVER['SERVER_NAME'], $domain, $base), $checkstr)) {
             return true;
         }
+
         return false;
     }
 
-    private function verifyIpMask($data, $checkstr)
+    final private function verifyIpMask($data, $checkstr)
     {
         if (!is_array($data)) {
             $data = array($data);
         }
         foreach ($data as $name) {
-            $ipdata = explode('.', gethostbyname($name));
-            if (isset($ipdata[3])) $ipdata[3] = '*';
-            $mask = implode('.', $ipdata);
-            if ("wf" . substr(sha1(self::SKEY . $mask), 0, 10) == substr($checkstr, 0, 12)) {
-                return true;
-            }
-            if (isset($ipdata[2])) $ipdata[2] = '*';
-            $mask = implode('.', $ipdata);
-            if ("wf" . substr(sha1(self::SKEY . $mask), 0, 10) == substr($checkstr, 0, 12)) {
-                return true;
+            $dns_record = @dns_get_record($name,DNS_A);
+            if(isset($dns_record[0]) && !empty($dns_record[0]['ip'])) {
+                $ipdata = explode('.', $dns_record[0]['ip']);
+                if (isset($ipdata[3])) $ipdata[3] = '*';
+                $mask = implode('.', $ipdata);
+                if ("wf" . substr(sha1(self::SKEY . $mask), 0, 10) == substr($checkstr, 0, 12)) {
+                    return true;
+                }
+                if (isset($ipdata[2])) $ipdata[2] = '*';
+                $mask = implode('.', $ipdata);
+                if ("wf" . substr(sha1(self::SKEY . $mask), 0, 10) == substr($checkstr, 0, 12)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    public function isProduction()
+    final public function getSerial()
     {
         $serial = Mage::getStoreConfig('webforms/license/serial');
         if (Mage::app()->getRequest()->getParam('website')) {
@@ -305,10 +329,21 @@ class VladimirPopov_WebForms_Helper_Data
             $serial = Mage::getStoreConfig('webforms/license/serial', Mage::app()->getRequest()->getParam('store'));
         }
 
+        return $serial;
+    }
+
+    final public function isProduction()
+    {
+        $errors = array();
+        $warnings = array();
+
+        $serial = $this->getSerial();
+
         $checkstr = strtolower(str_replace(array(" ", "-"), "", $serial));
 
-        // check for local environment
-        if ($this->isLocal()) return true;
+        // check local environment
+        if(self::DEV_CHECK)
+            if ($this->isLocal()) return array('verified' => true, 'errors' => $errors, 'warnings' => $warnings);
 
         $domain = $this->getDomain($_SERVER['SERVER_NAME']);
 
@@ -320,10 +355,30 @@ class VladimirPopov_WebForms_Helper_Data
             $domain2 = $this->getDomain(Mage::getStoreConfig('web/unsecure/base_url', Mage::app()->getRequest()->getParam('store')));
         }
 
-        return $this->verify($domain, $checkstr) || $this->verify($domain2, $checkstr);
+        $verified = $this->verify($domain, $checkstr) || $this->verify($domain2, $checkstr);
+
+        if (!$verified) {
+            $errors[] = Mage::helper('webforms')->__('Incorrect serial number.');
+        } else {
+            // check development
+            if (substr(strtoupper(sha1('DEV')), 0, 2) == substr($serial, -2)) {
+                $warnings[] = Mage::helper('webforms')->__('Development license detected. Please do not use for production.');
+            } else {
+                // check Magento edition
+                $magento_edition = Mage::getEdition();
+                $edition = substr(strtoupper(sha1(strtoupper(substr($magento_edition, 0, 1) . 'E'))), 0, 2);
+                if (substr($serial, -2) != substr(strtoupper(sha1(strtoupper('EE'))), 0, 2)) {
+                    if ($edition != substr($serial, -2)) {
+                        $errors[] = Mage::helper('webforms')->__('The license is not valid for Magento %s edition. Please do not use for production.', $magento_edition);
+                    }
+                }
+            }
+        }
+
+        return array('verified' => $verified, 'errors' => $errors, 'warnings' => $warnings);
     }
 
-    public function isLocal()
+    final public function isLocal()
     {
         $server_name = Mage::app()->getRequest()->getServer('SERVER_NAME');
         $domain = $this->getDomain($server_name);
@@ -335,7 +390,7 @@ class VladimirPopov_WebForms_Helper_Data
             substr($server_name, -7) == '.xip.io';
     }
 
-    public function getNote()
+    final public function getNote()
     {
         if (Mage::getStoreConfig('webforms/license/serial')) {
             return $this->__('WebForms Professional Edition license number is not valid for store domain.');
@@ -406,6 +461,29 @@ class VladimirPopov_WebForms_Helper_Data
 
         return false;
     }
+
+    public function isInEmailStoplist($email){
+        if(!$email) return false;
+
+        $stoplist = preg_split("/[\s\n,;]+/",Mage::getStoreConfig('webforms/email/stoplist'));
+        $flag = false;
+        foreach($stoplist as $blocked_email){
+            $pattern = trim($blocked_email);
+
+            // clear global modifier
+            if (substr($pattern, 0, 1) == '/' && substr($pattern, -2) == '/g') $pattern = substr($pattern, 0, strlen($pattern) - 1);
+
+            $status = @preg_match($pattern, "Test");
+            if($status !== false){
+                $validate = new Zend_Validate_Regex($pattern);
+                if($validate->isValid($email))
+                    $flag = true;
+            }
+            if($email == $blocked_email) return true;
+        }
+        return $flag;
+    }
+
 }
 
 // Fix for missing mime_content_type function

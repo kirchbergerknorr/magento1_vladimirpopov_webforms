@@ -306,8 +306,8 @@ class VladimirPopov_WebForms_Block_Webforms
     {
         if ($this->isAjax()) {
             $secure = strstr(Mage::helper('core/url')->getCurrentUrl(), 'https://') ? true : false;
-            // avoid trailing slash issue
-            return $this->getUrl('', array('_secure' => $secure)) . 'webforms/index/iframe';
+            // avoid trailing slash and missing slash issue
+            return rtrim($this->getUrl('webforms/index/iframe', array('_secure' => $secure)), '/');
         }
         return Mage::helper('core/url')->getCurrentUrl();
     }
